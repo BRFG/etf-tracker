@@ -1,0 +1,1446 @@
+{
+ "rows": [
+  {
+   "shard": "1_宽基市场",
+   "sub": "科创板宽基",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 2058.343,
+   "last_orig": 2058.3,
+   "last_diff": 0.043,
+   "n_bad": 2,
+   "max_abs": 11.691,
+   "sz_added": 5.727,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     11.691
+    ],
+    [
+     "2026-10-28",
+     -6.231
+    ]
+   ]
+  },
+  {
+   "shard": "1_宽基市场",
+   "sub": "A股全指",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 1248.619,
+   "last_orig": 1248.6,
+   "last_diff": 0.0192,
+   "n_bad": 1,
+   "max_abs": 12.1202,
+   "sz_added": 1163.823,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     12.1202
+    ]
+   ]
+  },
+  {
+   "shard": "1_宽基市场",
+   "sub": "A股大盘",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 1390.657,
+   "last_orig": 1390.7,
+   "last_diff": -0.043,
+   "n_bad": 1,
+   "max_abs": 5.117,
+   "sz_added": 333.091,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     5.117
+    ]
+   ]
+  },
+  {
+   "shard": "1_宽基市场",
+   "sub": "A股中盘",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 219.695,
+   "last_orig": 219.7,
+   "last_diff": -0.0054,
+   "n_bad": 2,
+   "max_abs": 2.8486,
+   "sz_added": 62.14,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     2.8486
+    ],
+    [
+     "2026-10-28",
+     1.4916
+    ]
+   ]
+  },
+  {
+   "shard": "1_宽基市场",
+   "sub": "A股小盘",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 295.784,
+   "last_orig": 295.8,
+   "last_diff": -0.016,
+   "n_bad": 2,
+   "max_abs": 9.164,
+   "sz_added": 110.528,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     9.164
+    ],
+    [
+     "2026-10-28",
+     7.224
+    ]
+   ]
+  },
+  {
+   "shard": "1_宽基市场",
+   "sub": "沪深港宽基",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 15.723,
+   "last_orig": 15.7,
+   "last_diff": 0.0231,
+   "n_bad": 0,
+   "max_abs": 0.0481,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "1_宽基市场",
+   "sub": "港股宽基",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 15.51,
+   "last_orig": 15.5,
+   "last_diff": 0.0097,
+   "n_bad": 0,
+   "max_abs": 0.0497,
+   "sz_added": 138.084,
+   "bad_sample": []
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "红利股息",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 330.454,
+   "last_orig": 330.5,
+   "last_diff": -0.0458,
+   "n_bad": 1,
+   "max_abs": 1.0792,
+   "sz_added": 396.177,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     1.0792
+    ]
+   ]
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "港红利股息",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 141.567,
+   "last_orig": 141.6,
+   "last_diff": -0.0331,
+   "n_bad": 0,
+   "max_abs": 0.4681,
+   "sz_added": 221.561,
+   "bad_sample": []
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "价值策略",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 65.051,
+   "last_orig": 65.1,
+   "last_diff": -0.0492,
+   "n_bad": 0,
+   "max_abs": 0.3398,
+   "sz_added": 104.229,
+   "bad_sample": []
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "红利低波",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 456.52,
+   "last_orig": 456.5,
+   "last_diff": 0.0196,
+   "n_bad": 1,
+   "max_abs": 1.4896,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     1.4896
+    ]
+   ]
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "现金流策略",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 58.917,
+   "last_orig": 58.9,
+   "last_diff": 0.0173,
+   "n_bad": 0,
+   "max_abs": 0.1677,
+   "sz_added": 253.509,
+   "bad_sample": []
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "成长策略",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 52.108,
+   "last_orig": 52.1,
+   "last_diff": 0.0076,
+   "n_bad": 0,
+   "max_abs": 0.4324,
+   "sz_added": 200.063,
+   "bad_sample": []
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "央国企改革",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 188.169,
+   "last_orig": 188.2,
+   "last_diff": -0.0311,
+   "n_bad": 0,
+   "max_abs": 0.0499,
+   "sz_added": 51.253,
+   "bad_sample": []
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "ESG治理",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 5.249,
+   "last_orig": 5.2,
+   "last_diff": 0.0492,
+   "n_bad": 0,
+   "max_abs": 0.0492,
+   "sz_added": 1.269,
+   "bad_sample": []
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "区域发展",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 11.858,
+   "last_orig": 11.9,
+   "last_diff": -0.0419,
+   "n_bad": 0,
+   "max_abs": 0.0499,
+   "sz_added": 42.343,
+   "bad_sample": []
+  },
+  {
+   "shard": "2_风格策略",
+   "sub": "综合策略",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 2.202,
+   "last_orig": 2.2,
+   "last_diff": 0.0017,
+   "n_bad": 0,
+   "max_abs": 0.0417,
+   "sz_added": 6.173,
+   "bad_sample": []
+  },
+  {
+   "shard": "3_科技",
+   "sub": "人工智能",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 315.863,
+   "last_orig": 315.9,
+   "last_diff": -0.0373,
+   "n_bad": 1,
+   "max_abs": 1.0277,
+   "sz_added": 429.335,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     1.0277
+    ]
+   ]
+  },
+  {
+   "shard": "3_科技",
+   "sub": "软件与信创",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 117.672,
+   "last_orig": 117.7,
+   "last_diff": -0.0277,
+   "n_bad": 1,
+   "max_abs": 0.6523,
+   "sz_added": 220.281,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     0.6523
+    ]
+   ]
+  },
+  {
+   "shard": "3_科技",
+   "sub": "科技综合",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 275.243,
+   "last_orig": 275.2,
+   "last_diff": 0.0435,
+   "n_bad": 1,
+   "max_abs": 1.9359,
+   "sz_added": 3161.27,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     -1.9359
+    ]
+   ]
+  },
+  {
+   "shard": "3_科技",
+   "sub": "半导体芯片",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 2142.986,
+   "last_orig": 2143.0,
+   "last_diff": -0.0142,
+   "n_bad": 3,
+   "max_abs": 164.7483,
+   "sz_added": 1235.606,
+   "bad_sample": [
+    [
+     "2026-07-20",
+     164.7483
+    ],
+    [
+     "2026-08-25",
+     41.8626
+    ],
+    [
+     "2026-10-28",
+     -25.7092
+    ]
+   ]
+  },
+  {
+   "shard": "3_科技",
+   "sub": "互联网",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 629.022,
+   "last_orig": 629.0,
+   "last_diff": 0.0215,
+   "n_bad": 1,
+   "max_abs": 2.0535,
+   "sz_added": 1484.881,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     -2.0535
+    ]
+   ]
+  },
+  {
+   "shard": "3_科技",
+   "sub": "金融科技",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 31.103,
+   "last_orig": 31.1,
+   "last_diff": 0.0025,
+   "n_bad": 0,
+   "max_abs": 0.1575,
+   "sz_added": 136.553,
+   "bad_sample": []
+  },
+  {
+   "shard": "3_科技",
+   "sub": "云计算与数据",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 50.073,
+   "last_orig": 50.1,
+   "last_diff": -0.0266,
+   "n_bad": 0,
+   "max_abs": 0.2264,
+   "sz_added": 28.083,
+   "bad_sample": []
+  },
+  {
+   "shard": "3_科技",
+   "sub": "通信",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 794.244,
+   "last_orig": 794.2,
+   "last_diff": 0.0436,
+   "n_bad": 2,
+   "max_abs": 11.9014,
+   "sz_added": 96.1,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     2.5436
+    ],
+    [
+     "2026-10-28",
+     -11.9014
+    ]
+   ]
+  },
+  {
+   "shard": "3_科技",
+   "sub": "消费电子",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 19.224,
+   "last_orig": 19.2,
+   "last_diff": 0.0239,
+   "n_bad": 0,
+   "max_abs": 0.1861,
+   "sz_added": 24.572,
+   "bad_sample": []
+  },
+  {
+   "shard": "3_科技",
+   "sub": "传媒游戏",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 121.327,
+   "last_orig": 121.3,
+   "last_diff": 0.027,
+   "n_bad": 0,
+   "max_abs": 0.443,
+   "sz_added": 83.52,
+   "bad_sample": []
+  },
+  {
+   "shard": "4_制造",
+   "sub": "汽车与零部件",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 21.73,
+   "last_orig": 21.7,
+   "last_diff": 0.03,
+   "n_bad": 1,
+   "max_abs": 0.725,
+   "sz_added": 14.328,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     0.725
+    ]
+   ]
+  },
+  {
+   "shard": "4_制造",
+   "sub": "工程机械",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 15.033,
+   "last_orig": 15.0,
+   "last_diff": 0.0327,
+   "n_bad": 0,
+   "max_abs": 0.5527,
+   "sz_added": 13.216,
+   "bad_sample": []
+  },
+  {
+   "shard": "4_制造",
+   "sub": "船舶",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 16.186,
+   "last_orig": 16.2,
+   "last_diff": -0.0142,
+   "n_bad": 0,
+   "max_abs": 0.0858,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "4_制造",
+   "sub": "航空航天",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 88.047,
+   "last_orig": 88.0,
+   "last_diff": 0.0471,
+   "n_bad": 0,
+   "max_abs": 0.4929,
+   "sz_added": 231.315,
+   "bad_sample": []
+  },
+  {
+   "shard": "4_制造",
+   "sub": "智能制造与机器人",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 212.285,
+   "last_orig": 212.3,
+   "last_diff": -0.015,
+   "n_bad": 1,
+   "max_abs": 1.53,
+   "sz_added": 377.878,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     -1.53
+    ]
+   ]
+  },
+  {
+   "shard": "4_制造",
+   "sub": "高端装备",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 5.986,
+   "last_orig": 6.0,
+   "last_diff": -0.014,
+   "n_bad": 0,
+   "max_abs": 0.276,
+   "sz_added": 9.756,
+   "bad_sample": []
+  },
+  {
+   "shard": "4_制造",
+   "sub": "国防军工",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 290.128,
+   "last_orig": 290.1,
+   "last_diff": 0.0283,
+   "n_bad": 1,
+   "max_abs": 1.7063,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     1.7063
+    ]
+   ]
+  },
+  {
+   "shard": "5_能源",
+   "sub": "电力",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 67.625,
+   "last_orig": 67.6,
+   "last_diff": 0.0254,
+   "n_bad": 0,
+   "max_abs": 0.2996,
+   "sz_added": 324.674,
+   "bad_sample": []
+  },
+  {
+   "shard": "5_能源",
+   "sub": "电池",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 87.681,
+   "last_orig": 87.7,
+   "last_diff": -0.0186,
+   "n_bad": 0,
+   "max_abs": 0.3314,
+   "sz_added": 254.61,
+   "bad_sample": []
+  },
+  {
+   "shard": "5_能源",
+   "sub": "光伏",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 121.012,
+   "last_orig": 121.0,
+   "last_diff": 0.0124,
+   "n_bad": 0,
+   "max_abs": 0.1824,
+   "sz_added": 45.085,
+   "bad_sample": []
+  },
+  {
+   "shard": "5_能源",
+   "sub": "新能源综合",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 53.75,
+   "last_orig": 53.8,
+   "last_diff": -0.05,
+   "n_bad": 0,
+   "max_abs": 0.1,
+   "sz_added": 74.675,
+   "bad_sample": []
+  },
+  {
+   "shard": "5_能源",
+   "sub": "公用事业",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 0.497,
+   "last_orig": 0.5,
+   "last_diff": -0.003,
+   "n_bad": 0,
+   "max_abs": 0.0487,
+   "sz_added": 2.103,
+   "bad_sample": []
+  },
+  {
+   "shard": "5_能源",
+   "sub": "风电与绿色能源",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 0.223,
+   "last_orig": 0.2,
+   "last_diff": 0.023,
+   "n_bad": 0,
+   "max_abs": 0.047,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "5_能源",
+   "sub": "环保与碳中和",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 53.855,
+   "last_orig": 53.9,
+   "last_diff": -0.0449,
+   "n_bad": 0,
+   "max_abs": 0.0509,
+   "sz_added": 23.024,
+   "bad_sample": []
+  },
+  {
+   "shard": "5_能源",
+   "sub": "新能源汽车",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 23.323,
+   "last_orig": 23.3,
+   "last_diff": 0.0231,
+   "n_bad": 0,
+   "max_abs": 0.1269,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "6_资源",
+   "sub": "有色金属",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 260.787,
+   "last_orig": 260.8,
+   "last_diff": -0.013,
+   "n_bad": 2,
+   "max_abs": 0.988,
+   "sz_added": 167.123,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     -0.988
+    ],
+    [
+     "2026-10-28",
+     -0.928
+    ]
+   ]
+  },
+  {
+   "shard": "6_资源",
+   "sub": "稀有金属",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 115.258,
+   "last_orig": 115.3,
+   "last_diff": -0.0415,
+   "n_bad": 0,
+   "max_abs": 0.2245,
+   "sz_added": 60.763,
+   "bad_sample": []
+  },
+  {
+   "shard": "6_资源",
+   "sub": "新材料",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 20.369,
+   "last_orig": 20.4,
+   "last_diff": -0.0312,
+   "n_bad": 0,
+   "max_abs": 0.3663,
+   "sz_added": 4.278,
+   "bad_sample": []
+  },
+  {
+   "shard": "6_资源",
+   "sub": "油气",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 14.239,
+   "last_orig": 14.2,
+   "last_diff": 0.0389,
+   "n_bad": 0,
+   "max_abs": 0.2189,
+   "sz_added": 36.954,
+   "bad_sample": []
+  },
+  {
+   "shard": "6_资源",
+   "sub": "贵金属",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 89.487,
+   "last_orig": 89.5,
+   "last_diff": -0.013,
+   "n_bad": 0,
+   "max_abs": 0.493,
+   "sz_added": 36.12,
+   "bad_sample": []
+  },
+  {
+   "shard": "6_资源",
+   "sub": "能源综合",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 2.285,
+   "last_orig": 2.3,
+   "last_diff": -0.0149,
+   "n_bad": 0,
+   "max_abs": 0.0499,
+   "sz_added": 6.595,
+   "bad_sample": []
+  },
+  {
+   "shard": "6_资源",
+   "sub": "石化化工",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 87.849,
+   "last_orig": 87.8,
+   "last_diff": 0.0494,
+   "n_bad": 0,
+   "max_abs": 0.0806,
+   "sz_added": 180.937,
+   "bad_sample": []
+  },
+  {
+   "shard": "6_资源",
+   "sub": "钢铁",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 7.322,
+   "last_orig": 7.3,
+   "last_diff": 0.0223,
+   "n_bad": 0,
+   "max_abs": 0.1623,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "6_资源",
+   "sub": "煤炭",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 63.122,
+   "last_orig": 63.1,
+   "last_diff": 0.0218,
+   "n_bad": 2,
+   "max_abs": 1.4282,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     -1.4282
+    ],
+    [
+     "2026-10-28",
+     -0.6132
+    ]
+   ]
+  },
+  {
+   "shard": "6_资源",
+   "sub": "资源综合",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 7.012,
+   "last_orig": 7.0,
+   "last_diff": 0.0117,
+   "n_bad": 0,
+   "max_abs": 0.0883,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "食品饮料",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 114.058,
+   "last_orig": 114.1,
+   "last_diff": -0.0424,
+   "n_bad": 0,
+   "max_abs": 0.1584,
+   "sz_added": 85.232,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "家电家居",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 2.946,
+   "last_orig": 2.9,
+   "last_diff": 0.0455,
+   "n_bad": 0,
+   "max_abs": 0.0495,
+   "sz_added": 7.744,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "畜牧养殖",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 38.063,
+   "last_orig": 38.1,
+   "last_diff": -0.0365,
+   "n_bad": 0,
+   "max_abs": 0.3585,
+   "sz_added": 146.519,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "农业",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 27.738,
+   "last_orig": 27.7,
+   "last_diff": 0.0379,
+   "n_bad": 0,
+   "max_abs": 0.2521,
+   "sz_added": 61.924,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "消费综合",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 136.572,
+   "last_orig": 136.6,
+   "last_diff": -0.0282,
+   "n_bad": 0,
+   "max_abs": 0.1472,
+   "sz_added": 275.544,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "交通物流",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 1.183,
+   "last_orig": 1.2,
+   "last_diff": -0.0169,
+   "n_bad": 0,
+   "max_abs": 0.0494,
+   "sz_added": 1.649,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "旅游",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 9.841,
+   "last_orig": 9.8,
+   "last_diff": 0.0409,
+   "n_bad": 0,
+   "max_abs": 0.0491,
+   "sz_added": 48.041,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "品牌消费",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 1.313,
+   "last_orig": 1.3,
+   "last_diff": 0.0127,
+   "n_bad": 0,
+   "max_abs": 0.0673,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "养老服务",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 2.063,
+   "last_orig": 2.1,
+   "last_diff": -0.0374,
+   "n_bad": 0,
+   "max_abs": 0.0476,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "教育",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 5.832,
+   "last_orig": 5.8,
+   "last_diff": 0.0321,
+   "n_bad": 0,
+   "max_abs": 0.0479,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_消费",
+   "sub": "白酒",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 311.61,
+   "last_orig": 311.6,
+   "last_diff": 0.0095,
+   "n_bad": 1,
+   "max_abs": 2.5355,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     2.5355
+    ]
+   ]
+  },
+  {
+   "shard": "7_医药",
+   "sub": "医药综合",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 1103.927,
+   "last_orig": 1103.9,
+   "last_diff": 0.0273,
+   "n_bad": 1,
+   "max_abs": 3.3377,
+   "sz_added": 335.139,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     -3.3377
+    ]
+   ]
+  },
+  {
+   "shard": "7_医药",
+   "sub": "创新药",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 533.514,
+   "last_orig": 533.5,
+   "last_diff": 0.014,
+   "n_bad": 2,
+   "max_abs": 2.561,
+   "sz_added": 711.21,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     -1.731
+    ],
+    [
+     "2026-10-28",
+     -2.561
+    ]
+   ]
+  },
+  {
+   "shard": "7_医药",
+   "sub": "生物医药",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 49.579,
+   "last_orig": 49.6,
+   "last_diff": -0.0212,
+   "n_bad": 0,
+   "max_abs": 0.1362,
+   "sz_added": 198.328,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_医药",
+   "sub": "医疗器械",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 4.469,
+   "last_orig": 4.5,
+   "last_diff": -0.0306,
+   "n_bad": 0,
+   "max_abs": 0.0806,
+   "sz_added": 115.638,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_医药",
+   "sub": "疫苗",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 3.746,
+   "last_orig": 3.7,
+   "last_diff": 0.0459,
+   "n_bad": 0,
+   "max_abs": 0.1341,
+   "sz_added": 4.724,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_医药",
+   "sub": "中药",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 23.284,
+   "last_orig": 23.3,
+   "last_diff": -0.016,
+   "n_bad": 0,
+   "max_abs": 0.091,
+   "sz_added": 9.46,
+   "bad_sample": []
+  },
+  {
+   "shard": "7_医药",
+   "sub": "医疗服务与互联网医疗",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 4.02,
+   "last_orig": 4.0,
+   "last_diff": 0.0196,
+   "n_bad": 0,
+   "max_abs": 0.1334,
+   "sz_added": 0.0,
+   "bad_sample": []
+  },
+  {
+   "shard": "8_金融地产",
+   "sub": "券商",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 1552.035,
+   "last_orig": 1552.0,
+   "last_diff": 0.0352,
+   "n_bad": 0,
+   "max_abs": 3.9192,
+   "sz_added": 262.667,
+   "bad_sample": []
+  },
+  {
+   "shard": "8_金融地产",
+   "sub": "保险与非银",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 260.79,
+   "last_orig": 260.8,
+   "last_diff": -0.0096,
+   "n_bad": 1,
+   "max_abs": 1.8704,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2026-10-28",
+     1.8704
+    ]
+   ]
+  },
+  {
+   "shard": "8_金融地产",
+   "sub": "金融综合",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 17.658,
+   "last_orig": 17.7,
+   "last_diff": -0.0419,
+   "n_bad": 0,
+   "max_abs": 0.1381,
+   "sz_added": 4.925,
+   "bad_sample": []
+  },
+  {
+   "shard": "8_金融地产",
+   "sub": "银行",
+   "verdict": "SPIKE",
+   "n": 1212,
+   "last_ours_sh": 226.445,
+   "last_orig": 226.4,
+   "last_diff": 0.0455,
+   "n_bad": 2,
+   "max_abs": 7.7625,
+   "sz_added": 11.309,
+   "bad_sample": [
+    [
+     "2026-08-25",
+     -0.8185
+    ],
+    [
+     "2026-10-28",
+     7.7625
+    ]
+   ]
+  },
+  {
+   "shard": "8_金融地产",
+   "sub": "建筑材料",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 1.322,
+   "last_orig": 1.3,
+   "last_diff": 0.0217,
+   "n_bad": 0,
+   "max_abs": 0.0483,
+   "sz_added": 13.357,
+   "bad_sample": []
+  },
+  {
+   "shard": "8_金融地产",
+   "sub": "基础设施",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 12.874,
+   "last_orig": 12.9,
+   "last_diff": -0.0264,
+   "n_bad": 0,
+   "max_abs": 0.1836,
+   "sz_added": 2.138,
+   "bad_sample": []
+  },
+  {
+   "shard": "8_金融地产",
+   "sub": "房地产",
+   "verdict": "OK",
+   "n": 1212,
+   "last_ours_sh": 52.286,
+   "last_orig": 52.3,
+   "last_diff": -0.0142,
+   "n_bad": 0,
+   "max_abs": 0.1667,
+   "sz_added": 26.715,
+   "bad_sample": []
+  },
+  {
+   "shard": "9_债券",
+   "sub": "科创债",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 20.766,
+   "last_orig": 2076.6,
+   "last_diff": -2055.8335,
+   "n_bad": 321,
+   "max_abs": 2161.4672,
+   "sz_added": 14.467,
+   "bad_sample": [
+    [
+     "2025-07-17",
+     -472.5273
+    ],
+    [
+     "2025-07-18",
+     -588.8515
+    ],
+    [
+     "2025-07-21",
+     -616.9681
+    ]
+   ]
+  },
+  {
+   "shard": "9_债券",
+   "sub": "信用债",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 13.439,
+   "last_orig": 1343.9,
+   "last_diff": -1330.4614,
+   "n_bad": 436,
+   "max_abs": 1495.692,
+   "sz_added": 9.276,
+   "bad_sample": [
+    [
+     "2025-01-22",
+     -26.829
+    ],
+    [
+     "2025-01-23",
+     -23.859
+    ],
+    [
+     "2025-01-24",
+     -52.0738
+    ]
+   ]
+  },
+  {
+   "shard": "9_债券",
+   "sub": "短期利率债",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 0.955,
+   "last_orig": 95.5,
+   "last_diff": -94.5446,
+   "n_bad": 947,
+   "max_abs": 140.7782,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2022-12-14",
+     -4.9498
+    ],
+    [
+     "2022-12-15",
+     -4.7515
+    ],
+    [
+     "2022-12-16",
+     -5.0485
+    ]
+   ]
+  },
+  {
+   "shard": "9_债券",
+   "sub": "超长期国债",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 2.864,
+   "last_orig": 286.4,
+   "last_diff": -283.5363,
+   "n_bad": 636,
+   "max_abs": 289.0799,
+   "sz_added": 3.75,
+   "bad_sample": [
+    [
+     "2024-03-28",
+     -43.6588
+    ],
+    [
+     "2024-03-29",
+     -40.6888
+    ],
+    [
+     "2024-04-01",
+     -36.0357
+    ]
+   ]
+  },
+  {
+   "shard": "9_债券",
+   "sub": "中长期利率债",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 4.037,
+   "last_orig": 403.7,
+   "last_diff": -399.6631,
+   "n_bad": 1212,
+   "max_abs": 400.1583,
+   "sz_added": 5.319,
+   "bad_sample": [
+    [
+     "2021-11-12",
+     -26.6314
+    ],
+    [
+     "2021-11-15",
+     -26.6314
+    ],
+    [
+     "2021-11-16",
+     -26.6314
+    ]
+   ]
+  },
+  {
+   "shard": "9_债券",
+   "sub": "短期融资券",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 7.678,
+   "last_orig": 767.8,
+   "last_diff": -760.122,
+   "n_bad": 1212,
+   "max_abs": 879.6151,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2021-11-12",
+     -12.6717
+    ],
+    [
+     "2021-11-15",
+     -12.6717
+    ],
+    [
+     "2021-11-16",
+     -12.6717
+    ]
+   ]
+  },
+  {
+   "shard": "9_债券",
+   "sub": "可转债与可交换债",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 58.433,
+   "last_orig": 5843.3,
+   "last_diff": -5784.8665,
+   "n_bad": 1212,
+   "max_abs": 5784.8665,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2021-11-12",
+     -79.1995
+    ],
+    [
+     "2021-11-15",
+     -79.1005
+    ],
+    [
+     "2021-11-16",
+     -79.0015
+    ]
+   ]
+  },
+  {
+   "shard": "9_债券",
+   "sub": "地方政府债",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 1.462,
+   "last_orig": 146.2,
+   "last_diff": -144.7377,
+   "n_bad": 1212,
+   "max_abs": 146.7182,
+   "sz_added": 1.901,
+   "bad_sample": [
+    [
+     "2021-11-12",
+     -12.0782
+    ],
+    [
+     "2021-11-15",
+     -12.0782
+    ],
+    [
+     "2021-11-16",
+     -12.0782
+    ]
+   ]
+  },
+  {
+   "shard": "9_债券",
+   "sub": "城投债",
+   "verdict": "UNIT×100",
+   "n": 1212,
+   "last_ours_sh": 54.328,
+   "last_orig": 5432.8,
+   "last_diff": -5378.4722,
+   "n_bad": 926,
+   "max_abs": 5378.4722,
+   "sz_added": 0.0,
+   "bad_sample": [
+    [
+     "2023-01-13",
+     -142.9562
+    ],
+    [
+     "2023-01-16",
+     -142.9562
+    ],
+    [
+     "2023-01-17",
+     -142.8572
+    ]
+   ]
+  }
+ ],
+ "cat_tot": {
+  "1_宽基市场": {
+   "sha": 5244.330730999998,
+   "all": 7057.723458990002,
+   "orig": 5244.3
+  },
+  "2_风格策略": {
+   "sha": 1312.094306,
+   "all": 2588.6698489499995,
+   "orig": 1312.2000000000003
+  },
+  "3_科技": {
+   "sha": 4496.756214000001,
+   "all": 11396.95770316,
+   "orig": 4496.7
+  },
+  "4_制造": {
+   "sha": 649.394856,
+   "all": 1295.8877998799999,
+   "orig": 649.3000000000001
+  },
+  "5_能源": {
+   "sha": 407.967405,
+   "all": 1132.1383048600003,
+   "orig": 408.0
+  },
+  "6_资源": {
+   "sha": 667.7303340000001,
+   "all": 1160.5009347200003,
+   "orig": 667.6999999999999
+  },
+  "7_消费": {
+   "sha": 651.2173190000001,
+   "all": 1277.87144708,
+   "orig": 651.2
+  },
+  "7_医药": {
+   "sha": 1722.5389630000002,
+   "all": 3097.0379046,
+   "orig": 1722.5
+  },
+  "8_金融地产": {
+   "sha": 2123.4101790000004,
+   "all": 2444.52184201,
+   "orig": 2123.4000000000005
+  },
+  "9_债券": {
+   "sha": 0.0,
+   "all": 0.0,
+   "orig": 0.0
+  }
+ }
+}

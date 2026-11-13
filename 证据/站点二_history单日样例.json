@@ -1,0 +1,223 @@
+{
+ "records": {
+  "2026-11-09": {
+   "_fut": {
+    "IH": {
+     "IH2611": {
+      "short": 4243,
+      "short_chg": 307,
+      "long": 1915,
+      "long_chg": 80
+     },
+     "IH2612": {
+      "long": 9295,
+      "long_chg": -53,
+      "short": 11304,
+      "short_chg": -688
+     },
+     "IH2703": {
+      "short": 4249,
+      "short_chg": -297,
+      "long": 2189,
+      "long_chg": -167
+     }
+    },
+    "IF": {
+     "IF2611": {
+      "short": 8683,
+      "short_chg": -70,
+      "long": 6468,
+      "long_chg": -575
+     },
+     "IF2612": {
+      "short": 29345,
+      "short_chg": -1636,
+      "long": 20170,
+      "long_chg": -1430
+     },
+     "IF2703": {
+      "short": 15310,
+      "short_chg": 28,
+      "long": 5122,
+      "long_chg": -174
+     },
+     "IF2706": {
+      "short": 4535,
+      "short_chg": -73,
+      "long": 2166,
+      "long_chg": -28
+     }
+    },
+    "IC": {
+     "IC2611": {
+      "short": 13532,
+      "short_chg": -638,
+      "long": 6962,
+      "long_chg": -1055
+     },
+     "IC2612": {
+      "long": 27821,
+      "long_chg": -1945,
+      "short": 34427,
+      "short_chg": -1107
+     },
+     "IC2703": {
+      "long": 8438,
+      "long_chg": 120,
+      "short": 13914,
+      "short_chg": -9
+     },
+     "IC2706": {
+      "long": 3119,
+      "long_chg": -130,
+      "short": 4540,
+      "short_chg": -133
+     }
+    },
+    "IM": {
+     "IM2611": {
+      "short": 26136,
+      "short_chg": -1807,
+      "long": 13283,
+      "long_chg": -2265
+     },
+     "IM2612": {
+      "long": 45445,
+      "long_chg": -4425,
+      "short": 60740,
+      "short_chg": -5085
+     },
+     "IM2703": {
+      "long": 11976,
+      "long_chg": -2248,
+      "short": 21837,
+      "short_chg": -2234
+     },
+     "IM2706": {
+      "long": 4886,
+      "long_chg": -427,
+      "short": 7008,
+      "short_chg": 168
+     }
+    }
+   },
+   "510300": {
+    "shares_yi": 466.6819,
+    "src": "sse",
+    "close": 4.13,
+    "vwap": 4.1422,
+    "amount_yi": 44.111
+   },
+   "510310": {
+    "shares_yi": 261.7084,
+    "src": "sse",
+    "close": 4.015,
+    "vwap": 4.0242,
+    "amount_yi": 10.3923
+   },
+   "510330": {
+    "shares_yi": 156.6655,
+    "src": "sse",
+    "close": 4.308,
+    "vwap": 4.318,
+    "amount_yi": 4.0104
+   },
+   "159919": {
+    "shares_yi": 140.1142,
+    "nav": 4.3132,
+    "src": "szse",
+    "close": 4.314,
+    "vwap": 4.3216,
+    "amount_yi": 12.3682
+   },
+   "510050": {
+    "shares_yi": 166.4257,
+    "src": "sse",
+    "close": 2.909,
+    "vwap": 2.9105,
+    "amount_yi": 15.6194
+   },
+   "510180": {
+    "shares_yi": 44.4956,
+    "src": "sse",
+    "close": 3.695,
+    "vwap": 3.6986,
+    "amount_yi": 0.6588
+   },
+   "510500": {
+    "shares_yi": 97.7657,
+    "src": "sse",
+    "close": 6.612,
+    "vwap": 6.6597,
+    "amount_yi": 33.7326
+   },
+   "512500": {
+    "shares_yi": 20.5921,
+    "src": "sse",
+    "close": 3.75,
+    "vwap": 3.768,
+    "amount_yi": 5.671
+   },
+   "512100": {
+    "shares_yi": 195.0522,
+    "src": "sse",
+    "close": 2.644,
+    "vwap": 2.6652,
+    "amount_yi": 31.1889
+   },
+   "159845": {
+    "shares_yi": 39.3343,
+    "nav": 2.7158,
+    "src": "szse",
+    "close": 2.714,
+    "vwap": 2.7333,
+    "amount_yi": 17.2122
+   },
+   "560010": {
+    "shares_yi": 39.2662,
+    "src": "sse",
+    "close": 2.71,
+    "vwap": 2.727,
+    "amount_yi": 16.1687
+   },
+   "159629": {
+    "shares_yi": 11.8525,
+    "nav": 2.7256,
+    "src": "szse",
+    "close": 2.719,
+    "vwap": 2.7444,
+    "amount_yi": 4.7966
+   },
+   "588000": {
+    "shares_yi": 1076.4867,
+    "src": "sse",
+    "close": 1.327,
+    "vwap": 1.3369,
+    "amount_yi": 71.2777
+   },
+   "588080": {
+    "shares_yi": 337.0363,
+    "src": "sse",
+    "close": 1.287,
+    "vwap": 1.2959,
+    "amount_yi": 17.4809
+   },
+   "159915": {
+    "shares_yi": 458.6245,
+    "nav": 2.4812,
+    "src": "szse",
+    "close": 2.472,
+    "vwap": 2.4996,
+    "amount_yi": 79.2275
+   },
+   "159977": {
+    "shares_yi": 58.2587,
+    "nav": 1.2877,
+    "src": "szse",
+    "close": 1.285,
+    "vwap": 1.2971,
+    "amount_yi": 3.7963
+   }
+  }
+ }
+}

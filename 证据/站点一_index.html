@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETF 细分行业资金流向</title>
+<script src="echarts.min.js"></script>
+<style>
+:root{--bg:#ffffff;--card:#f6f8fa;--border:#d0d7de;--text:#1f2328;--muted:#57606a;--up:#cf222e;--down:#1a7f37;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font:14px/1.6 "Microsoft YaHei","PingFang SC",sans-serif;}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
+h1{font-size:22px;font-weight:700;color:#1f2328;}
+.sub{color:var(--muted);font-size:13px;margin-top:4px;}
+.brand{color:var(--muted);font-size:12px;margin-top:10px;}
+.notice{color:var(--up);font-size:12px;margin-top:3px;}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 0;}
+.tabs button{cursor:pointer;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font:600 13px/1.6 "Microsoft YaHei","PingFang SC",sans-serif;padding:5px 14px;}
+.tabs button:hover{color:#1f2328;border-color:#8b949e;}
+.tabs button.active{background:#1f6feb;border-color:#1f6feb;color:#fff;}
+.ranges{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0;}
+.ranges button{cursor:pointer;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font:600 12px/1.6 "Microsoft YaHei","PingFang SC",sans-serif;padding:3px 12px;}
+.ranges button:hover{color:#1f2328;border-color:#8b949e;}
+.ranges button.active{background:#238636;border-color:#238636;color:#fff;}
+.page-wm{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.07;
+background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22260%22%20height%3D%22160%22%3E%3Ctext%20x%3D%22130%22%20y%3D%2288%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%238b949e%22%20text-anchor%3D%22middle%22%20font-family%3D%22Microsoft%20YaHei%2Csans-serif%22%20transform%3D%22rotate%28-22%20130%2080%29%22%3EB%E7%AB%99%E7%94%9F%E7%82%B8%E7%93%9C%3C%2Ftext%3E%3C%2Fsvg%3E");background-repeat:repeat;background-size:260px 160px;}
+.cat{display:none;margin-top:22px;}
+.cat.active{display:block;}
+section{margin-top:30px;}
+h2{font-size:17px;font-weight:700;color:#1f2328;margin-bottom:10px;padding-left:10px;border-left:3px solid #58a6ff;}
+table{width:100%;border-collapse:collapse;background:#ffffff;border:1px solid var(--border);border-radius:8px;overflow:hidden;font-size:13px;}
+th,td{padding:7px 12px;text-align:right;white-space:nowrap;}
+th:first-child,td:first-child{text-align:left;}
+th{background:#f6f8fa;color:#57606a;font-weight:600;}
+tbody tr+tr{border-top:1px solid #eaeef2;}
+.up{color:var(--up);}.down{color:var(--down);}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.tbl-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:16px;}
+.tbl-grid>section{display:flex;flex-direction:column;margin-top:0;}
+.tbl-grid>section table{flex:1;}
+.tbl-grid .span2{grid-row:1 / 3;}
+@media(max-width:760px){.cols{grid-template-columns:1fr;}.tbl-grid{grid-template-columns:1fr;}.tbl-grid .span2{grid-row:auto;}}
+.cat{margin-top:34px;}
+.cat h2{font-size:18px;}
+.card{position:relative;background:#ffffff;border:1px solid var(--border);border-radius:10px;margin-top:14px;overflow:hidden;}
+.card h3{font-size:14px;font-weight:600;color:#1f2328;padding:12px 16px 0;}
+.wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:6;font-size:30px;font-weight:700;color:#57606a;opacity:.10;}
+.etf-pop{position:absolute;top:46px;right:12px;z-index:8;display:none;pointer-events:none;
+background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:8px;
+padding:6px 10px;font-size:12px;line-height:1.7;color:#57606a;max-width:90%;
+box-shadow:0 2px 8px rgba(31,35,40,.08);text-align:left;}
+.etf-pop b{color:#1f2328;}
+.etf-pop .l{font-size:11px;line-height:1.5;margin-top:2px;}
+.chart{width:100%;height:420px;}
+.chart.short{height:340px;}
+</style>
+</head>
+<body>
+<div class="page-wm"></div>
+<div class="wrap">
+<h1>ETF 细分行业资金流向</h1>
+<div class="sub">数据区间 2021-11-09 ~ 2026-11-09（1212 个交易日，最多展示 5 年） ｜ 近期区间 2026-11-02 ~ 2026-11-09（6 个交易日）</div>
+<div class="brand">B站生炸瓜</div>
+<div class="notice">注意：数据由交易所公开接口抓取，数据只反映ETF资金状况，不可作为唯一买入逻辑，需结合其他逻辑谨慎参考。</div>
+<div class="tbl-grid"><section class="span2"><h2>各大类规模与近期区间变动（亿份）</h2><table><thead><tr><th>大类</th><th>当前总规模</th><th>区间首日规模</th><th>变动比例</th></tr></thead><tbody><tr><td>9.债券</td><td>16388.4</td><td>16103.2</td><td class="up">+1.77%</td></tr><tr><td>1.宽基市场</td><td>5347.6</td><td>4877.4</td><td class="up">+9.64%</td></tr><tr><td>3.科技</td><td>4456.2</td><td>4308.8</td><td class="up">+3.42%</td></tr><tr><td>7.医药&amp;消费</td><td>2370.5</td><td>2416.3</td><td class="down">-1.90%</td></tr><tr><td>8.金融地产</td><td>2120.1</td><td>2137.3</td><td class="down">-0.80%</td></tr><tr><td>2.风格策略</td><td>1322.6</td><td>1349.9</td><td class="down">-2.02%</td></tr><tr><td>6.资源</td><td>666.7</td><td>678.4</td><td class="down">-1.73%</td></tr><tr><td>4.制造</td><td>648.0</td><td>647.3</td><td class="up">+0.10%</td></tr><tr><td>5.能源</td><td>415.6</td><td>383.6</td><td class="up">+8.33%</td></tr></tbody></table></section><section><h2>细分行业近一周份额增加量 TOP 5</h2><table><thead><tr><th>细分行业</th><th>增加量(亿份)</th><th>变动百分比</th></tr></thead><tbody><tr><td>可转债与可交换债</td><td class="up">+242.3</td><td class="up">+4.38%</td></tr><tr><td>半导体芯片</td><td class="up">+180.0</td><td class="up">+9.22%</td></tr><tr><td>A股大盘</td><td class="up">+165.5</td><td class="up">+13.30%</td></tr><tr><td>科创板宽基</td><td class="up">+158.0</td><td class="up">+8.13%</td></tr><tr><td>A股全指</td><td class="up">+61.3</td><td class="up">+5.04%</td></tr></tbody></table></section><section><h2>细分行业近一周份额减少量 TOP 5</h2><table><thead><tr><th>细分行业</th><th>减少量(亿份)</th><th>变动百分比</th></tr></thead><tbody><tr><td>通信</td><td class="down">-46.8</td><td class="down">-5.78%</td></tr><tr><td>医药综合</td><td class="down">-21.9</td><td class="down">-1.95%</td></tr><tr><td>短期融资券</td><td class="down">-17.3</td><td class="down">-2.17%</td></tr><tr><td>红利股息</td><td class="down">-14.8</td><td class="down">-4.31%</td></tr><tr><td>创新药</td><td class="down">-14.5</td><td class="down">-2.66%</td></tr></tbody></table></section></div>
+<div class="tabs" id="tabs"><button data-target="1_宽基市场" class="active">1.宽基市场</button><button data-target="2_风格策略">2.风格策略</button><button data-target="3_科技">3.科技</button><button data-target="4_制造">4.制造</button><button data-target="5_能源">5.能源</button><button data-target="6_资源">6.资源</button><button data-target="7_消费">7.消费</button><button data-target="7_医药">7.医药</button><button data-target="8_金融地产">8.金融地产</button><button data-target="9_债券">9.债券</button></div>
+<div class="ranges" id="ranges"><button data-years="1">1年</button><button data-years="3" class="active">3年</button><button data-years="5">5年</button></div>
+<section class="cat active" id="1_宽基市场"><h2 style="border-left-color:#D16F3F">1.宽基市场</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="1_宽基市场_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="1_宽基市场_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="1_宽基市场_c3" class="chart chart short"></div></div></section><section class="cat" id="2_风格策略"><h2 style="border-left-color:#D13F70">2.风格策略</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="2_风格策略_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="2_风格策略_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="2_风格策略_c3" class="chart chart short"></div></div></section><section class="cat" id="3_科技"><h2 style="border-left-color:#3F70D1">3.科技</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="3_科技_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="3_科技_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="3_科技_c3" class="chart chart short"></div></div></section><section class="cat" id="4_制造"><h2 style="border-left-color:#D1D03F">4.制造</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="4_制造_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="4_制造_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="4_制造_c3" class="chart chart short"></div></div></section><section class="cat" id="5_能源"><h2 style="border-left-color:#D03FD1">5.能源</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="5_能源_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="5_能源_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="5_能源_c3" class="chart chart short"></div></div></section><section class="cat" id="6_资源"><h2 style="border-left-color:#6F3FD1">6.资源</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="6_资源_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="6_资源_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="6_资源_c3" class="chart chart short"></div></div></section><section class="cat" id="7_消费"><h2 style="border-left-color:#70D13F">7.消费</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="7_消费_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="7_消费_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="7_消费_c3" class="chart chart short"></div></div></section><section class="cat" id="7_医药"><h2 style="border-left-color:#70D13F">7.医药</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="7_医药_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="7_医药_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="7_医药_c3" class="chart chart short"></div></div></section><section class="cat" id="8_金融地产"><h2 style="border-left-color:#3FD16F">8.金融地产</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="8_金融地产_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="8_金融地产_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="8_金融地产_c3" class="chart chart short"></div></div></section><section class="cat" id="9_债券"><h2 style="border-left-color:#3FD1D0">9.债券</h2><div class="card"><h3>ETF份额变化全景分析</h3><div class="wm">B站生炸瓜</div><div id="9_债券_c1" class="chart"></div></div><div class="card"><h3>长期份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="9_债券_c2" class="chart"></div></div><div class="card"><h3>近 7 个自然日内交易日份额变化率（各小类首个有效日=100%）</h3><div class="wm">B站生炸瓜</div><div id="9_债券_c3" class="chart chart short"></div></div></section>
+</div>
+<script>
+var YEARS = 3;
+function fmtDate(s){return s.slice(5);}
+function sliceStartIndex(dates, years){
+  if(!years) return 0;
+  var last=new Date(dates[dates.length-1]);
+  var cutoff=new Date(last.getTime()); cutoff.setFullYear(cutoff.getFullYear()-years);
+  for(var i=0;i<dates.length;i++){ if(new Date(dates[i])>=cutoff) return i; }
+  return Math.max(0,dates.length-1);
+}
+function ratesFromFirstPositive(values){
+  var base=null;
+  for(var i=0;i<values.length;i++){
+    if(values[i]!=null&&isFinite(values[i])&&values[i]>0){base=i;break;}
+  }
+  var out=values.map(function(){return null;});
+  if(base==null) return out;
+  for(var j=base;j<values.length;j++){
+    out[j]=values[j]==null?null:values[j]/values[base]*100;
+  }
+  return out;
+}
+function renderChart(id,cfg,notMerge){
+  var el=document.getElementById(id);if(!el)return;
+  var chart=window._charts&&window._charts[id];
+  if(!chart){ chart=echarts.init(el,null,{renderer:'canvas'});
+    window._charts=window._charts||{};window._charts[id]=chart;
+    window.addEventListener('resize',function(){chart.resize();});
+    // 悬停图例/数据点时，浮出该小类包含的 ETF 标的清单（不占版面）
+    var pop=document.createElement('div');pop.className='etf-pop';el.parentElement.appendChild(pop);
+    chart.on('highlight',function(e){
+      var s=null;
+      if(e&&e.seriesName){ for(var i=0;i<cfg.series.length;i++){ if(cfg.series[i].name===e.seriesName){ s=cfg.series[i]; break; } } }
+      else if(e&&e.batch&&e.batch.length===1&&typeof e.batch[0].seriesIndex==='number'){ s=cfg.series[e.batch[0].seriesIndex]||null; }
+      else if(e&&typeof e.seriesIndex==='number'){ s=cfg.series[e.seriesIndex]||null; }
+      if(!s){return;}
+      var list=window._etfs?window._etfs[s.name]:null;
+      if(list&&list.length){
+        pop.innerHTML='<div><b>'+s.name+'</b> · '+list.length+'只标的</div><div class="l">'+list.join('，')+'</div>';
+        pop.style.display='block';
+      }else{pop.style.display='none';}
+    });
+    chart.on('downplay',function(){pop.style.display='none';});
+  }
+  var percent=!!cfg.percent;
+  var dates=cfg.dates, start=0;
+  if(!cfg.shortDates){ start=sliceStartIndex(cfg.dates,YEARS); dates=cfg.dates.slice(start); }
+  var series=cfg.series.map(function(s){
+    var values=s.values.slice(start);
+    if(percent){ values=ratesFromFirstPositive(values); }
+    var item={
+      name:s.name,type:'line',data:values,showSymbol:!!cfg.showSymbol,
+      sampling:cfg.shortDates?undefined:'lttb',
+      symbol:'circle',symbolSize:4,lineStyle:{width:2.5,opacity:.9},
+      itemStyle:{color:s.color},color:s.color,
+      emphasis:{focus:'series'},
+      endLabel:{show:true,precision:0,formatter:function(p){return p.seriesName+' '+p.value.toFixed(0)+(percent?'%':'');},
+        color:s.color,fontWeight:'bold',fontSize:11,backgroundColor:'rgba(255,255,255,.88)',padding:[2,4],borderRadius:3,
+        overflow:'break'},
+      labelLayout:{moveOverlap:'shiftY',hideOverlap:false}
+    };
+    if(percent){
+      item.areaStyle={color:s.color,opacity:.12,origin:100};
+    }
+    return item;
+  });
+  var option={
+    backgroundColor:'transparent',
+    animation:false,
+    legend:{type:'scroll',top:6,left:12,right:130,itemWidth:14,itemHeight:8,itemGap:12,
+      icon:'roundRect',textStyle:{color:'#57606a',fontSize:11},pageIconSize:10},
+    grid:{left:60,right:130,top:58,bottom:40},
+    tooltip:{trigger:'axis',backgroundColor:'#ffffff',borderColor:'#d0d7de',textStyle:{color:'#1f2328',fontSize:12},
+      valueFormatter:function(v){return v==null?'-':Number(v).toFixed(2)+(percent?'%':'');}},
+    xAxis:{type:'category',data:dates,boundaryGap:false,
+      axisLine:{lineStyle:{color:'#d0d7de'}},axisTick:{show:false},
+      splitLine:{show:true,alignWithLabel:true,lineStyle:{color:'#eaeef2',type:'dashed',opacity:1}},
+      axisLabel:{color:'#57606a',fontSize:11,
+        formatter:cfg.shortDates?fmtDate:function(v){return v.slice(0,7);},
+        interval:cfg.shortDates?0:'auto'},
+      axisPointer:{label:{backgroundColor:'#d0d7de'}}},
+    yAxis:{type:'value',scale:true,splitLine:{lineStyle:{color:'#eaeef2',type:'dashed',opacity:1}},
+      axisLabel:{color:'#57606a',fontSize:11,formatter:percent?'{value}%':'{value}'}},
+    series:series
+  };
+  if(percent){
+    option.series.push({name:'基准线',type:'line',data:[],markLine:{silent:true,symbol:'none',
+      lineStyle:{color:'#57606a',type:'dashed',width:1.5,opacity:.7},
+      label:{show:false},data:[{yAxis:100}]}});
+  }
+  chart.setOption(option,notMerge===true);
+}
+function activateTab(btn){
+  document.querySelectorAll('.tabs button').forEach(function(b){b.classList.toggle('active',b===btn);});
+  document.querySelectorAll('section.cat').forEach(function(sec){sec.classList.remove('active');});
+  var target=document.getElementById(btn.dataset.target);
+  if(target){
+    target.classList.add('active');
+    target.querySelectorAll('.chart').forEach(function(el){
+      var c=window._charts&&window._charts[el.id];if(c){c.resize();}
+    });
+  }
+}
+function setRange(btn){
+  document.querySelectorAll('.ranges button').forEach(function(b){b.classList.toggle('active',b===btn);});
+  YEARS=parseInt(btn.dataset.years,10)||0;
+  Object.keys(window.CHARTS_DATA||{}).forEach(function(cid){
+    var d=window.CHARTS_DATA[cid];
+    for(var k in d){ if(!d[k].shortDates && window._charts && window._charts[d[k].id]){ renderChart(d[k].id,d[k],true); } }
+  });
+}
+</script>
+<script>
+var ETFS = {"人工智能":["515070 华夏中证人工智能主题交易…","515980 华富中证人工智能产业交易…","512930 平安中证人工智能主题交易…","588790 博时上证科创板人工智能交…","588760 广发上证科创板人工智能交…","589010 华夏上证科创板人工智能交…","589520 华宝上证科创板人工智能交…","588730 易方达上证科创板人工智能…","589110 国泰上证科创板人工智能交…","588930 银华上证科创板人工智能交…","588510 华夏中证科创创业人工智能…","588420 摩根中证科创创业人工智能…","589560 汇添富上证科创板人工智能…","588470 华安中证科创创业人工智能…","589230 南方上证科创板人工智能交…","588480 中金中证科创创业人工智能…","517800 方正富邦中证沪港深人工智…","589090 鹏华上证科创板人工智能交…","589380 富国上证科创板人工智能交…","588430 工银瑞信中证科创创业人工…","588410 鹏华中证科创创业人工智能…"],"有色金属":["512400 南方中证申万有色金属交易…","516650 华夏中证细分有色金属产业…","560860 万家中证工业有色金属主题…","512940 华安中证有色金属矿业主题…","561330 国泰中证有色金属矿业主题…","560290 景顺长城中证有色金属矿业…","560470 易方达中证细分有色金属产…","560490 华泰柏瑞中证工业有色金属…","560870 中银中证工业有色金属主题…"],"电力":["561560 华泰柏瑞中证全指电力公用…","562550 华夏中证绿色电力交易型开…","562960 易方达中证绿色电力交易型…","560830 华夏中证全指电力公用事业…","561170 富国中证绿色电力交易型开…","560580 南方中证全指电力公用事业…","561700 博时中证全指电力公用事业…","560460 平安中证全指电力公用事业…","516370 汇添富中证全指电力公用事…","560450 天弘中证全指电力公用事业…","560930 易方达中证全指电力公用事…","560270 工银瑞信中证全指电力公用…","512140 华安中证全指电力公用事业…","560480 招商中证全指电力公用事业…","562350 银华中证全指电力公用事业…"],"软件与信创":["515230 国泰中证全指软件交易型开…","562930 易方达中证软件服务交易型…","512720 国泰中证计算机主题交易型…","562570 华夏中证信息技术应用创新…","561010 华安中证全指软件开发交易…","560360 万家中证软件服务交易型开…","560790 鹏华中证软件服务交易型开…","562030 华宝中证信息技术应用创新…","562920 易方达中证信息安全主题交…","560850 汇添富中证信息技术应用创…"],"红利股息":["515180 易方达中证红利交易型开放…","515080 招商中证红利交易型开放式…","510880 上证红利交易型开放式指数…","561580 华泰柏瑞中证中央企业红利…","510720 国泰上证国有企业红利交易…","515890 博时中证红利交易型开放式…","563700 易方达中证红利价值交易型…","515460 南方中证全指红利质量交易…","560370 易方达中证全指红利质量交…","560020 汇添富中证红利交易型开放…","560250 富国中证全指红利质量交易…","563180 银华中证高股息策略交易型…","512530 建信沪深300红利交易型…","561060 华安中证国有企业红利交易…","530880 银河上证国有企业红利交易…","563890 创金合信中证国有企业红利…","501059 西部利得中证国有企业红利…"],"电池":["561910 招商中证电池主题交易型开…","561160 富国中证电池主题交易型开…","562880 嘉实中证电池主题交易型开…","512460 华夏中证电池主题交易型开…","560910 华泰柏瑞中证电池主题交易…","560410 鹏华中证电池主题交易型开…"],"稀有金属":["562800 嘉实中证稀有金属主题交易…","516150 嘉实中证稀土产业交易型开…","516780 华泰柏瑞中证稀土产业交易…","561800 华富中证稀有金属主题交易…","561050 易方达中证稀有金属主题交…"],"科创板宽基":["588000 华夏上证科创板50成份交…","588080 易方达上证科创板50成份…","588060 广发上证科创板50成份交…","588050 工银瑞信上证科创板50成…","588220 鹏华上证科创板100交易…","588380 富国中证科创创业50交易…","588940 富国上证科创板50成份交…","588400 嘉实中证科创创业50交易…","588090 华泰柏瑞上证科创板50成…","588800 华夏上证科创板100交易…","588030 博时上证科创板100交易…","588300 招商中证科创创业50交易…","588330 华宝中证科创创业50交易…","589800 易方达上证科创板综合交易…","588870 汇添富上证科创板50成份…","589850 东财上证科创板50成份交…","589680 鹏华上证科创板综合交易型…","588190 银华上证科创板100交易…","589000 华夏上证科创板综合交易型…","588230 华泰柏瑞上证科创板200…","588120 国泰上证科创板100交易…","588180 国联安上证科创板50成份…","588950 景顺长城上证科创板50成…","589150 平安上证科创板50成份交…","588460 鹏华上证科创板50成份增…","588350 鹏扬中证科创创业50交易…","588280 华安上证科创板50成份交…","588150 南方上证科创板50成份交…","589880 建信上证科创板综合交易型…","589950 富国上证科创板100交易…","588900 南方上证科创板100交易…","589220 国泰上证科创板200交易…","589630 国泰上证科创板综合交易型…","588270 易方达上证科创板200交…","588210 易方达上证科创板100交…","589660 南方上证科创板综合交易型…","588360 国泰中证科创创业50交易…","589600 富国上证科创板综合价格交…","588140 广发上证科创板200交易…","588040 鹏华上证科创板50成份交…","588390 博时中证科创创业50交易…","588320 广发中证科创创业50增强…","589900 博时上证科创板综合交易型…","588820 华夏上证科创板200交易…","589860 天弘上证科创板综合交易型…","589080 汇添富上证科创板综合交易…","589770 招商上证科创板综合交易型…","589280 华宝上证科创板综合增强策…","589980 汇添富上证科创板100交…","588240 鹏华上证科创板200交易…","589820 建信上证科创板200交易…","588880 华泰柏瑞上证科创板100…","588720 中银上证科创板50成份交…","589990 华泰柏瑞上证科创板综合交…","589780 富国上证科创板200交易…","588450 招商上证科创板50成份增…","588370 南方上证科创板50成份增…","588550 易方达上证科创板综合增强…","589060 东财上证科创板综合价格交…","589890 景顺长城上证科创板综合价…","588840 万家上证科创板50成份交…","589500 工银瑞信上证科创板综合价…","588500 易方达上证科创板100增…","589050 兴业上证科创板综合价格交…","588690 银华上证科创板综合增强策…","589300 嘉实上证科创板综合交易型…","588660 兴银中证科创创业50交易…","588670 嘉实上证科创板综合增强策…","589200 工银瑞信上证科创板200…","588680 广发上证科创板100增强…","588310 方正富邦中证科创创业50…","589270 前海开源上证科创板100…","589580 兴银上证科创板综合价格交…","588980 广发上证科创板100交易…","588520 永赢上证科创板综合价格增…"],"汽车与零部件":["516520 华泰柏瑞中证智能汽车主题…","515250 富国中证智能汽车主题交易…","520600 广发中证港股通汽车产业主…","516110 国泰中证800汽车与零部…","520720 国泰中证港股通汽车产业主…","516840 南方中证全指汽车交易型开…","562700 华夏中证汽车零部件主题交…","520680 南方中证港股通汽车产业主…","520780 华宝中证港股通汽车产业主…"],"食品饮料":["515170 华夏中证细分食品饮料产业…","515710 华宝中证细分食品饮料产业…","516900 华安中证申万食品饮料交易…","560160 易方达中证全指食品交易型…","560420 前海开源中证全指食品交易…","563850 广发中证全指食品交易型开…","560320 富国中证全指食品交易型开…","560130 鹏华中证全指食品交易型开…"],"医药综合":["512170 华宝中证医疗交易型开放式…","512010 易方达沪深300医药卫生…","560260 广发中证医疗交易型开放式…","513200 易方达中证港股通医药卫生…","513700 鹏华中证港股通医药卫生综…","512120 华安中证细分医药交易型开…","515950 富国中证医药50交易型开…","520510 华夏中证港股通医疗主题交…","515960 嘉实中证医药健康100策…","520850 易方达中证港股通医疗主题…","562050 华宝中证制药交易型开放式…","513620 银华中证港股通医疗主题交…","510660 上证医药卫生交易型开放式…","517990 招商中证沪港深500医药…","526010 汇添富中证港股通医疗主题…","502056 广发中证医疗交易型开放式…"],"科技综合":["513980 景顺长城中证港股通科技交…","515000 华宝中证科技龙头交易型开…","513860 海富通中证港股通科技交易…","513020 国泰中证港股通科技交易型…","512220 景顺长城中证科技传媒通信…","513560 兴银中证港股通科技交易型…","560170 南方中证国新央企科技引领…","512330 中证500信息技术指数交…","520860 富国中证港股通科技交易型…","515580 华泰柏瑞中证科技100交…","588770 摩根上证科创板新一代信息…","520530 东财中证港股通科技交易型…","515750 富国中证科技50策略交易…","588100 嘉实上证科创板新一代信息…","563050 易方达中证国新央企科技引…","526000 华夏中证港股通信息技术综…","516050 工银瑞信中证科技龙头交易…","513150 华泰柏瑞中证港股通科技交…","515860 嘉实中证新兴科技100策…","513240 华安中证港股通信息技术综…","562380 银华中证国新央企科技引领…","563560 兴业中证科技优势成长50…","526050 招商中证港股通信息技术综…","588260 华安上证科创板新一代信息…","517350 广发中证沪港深科技龙头交…","517950 交银施罗德中证智选沪深港…","562560 华夏中证全指信息技术交易…","517360 华安中证沪港深科技100…","560990 中金中证科技先锋交易型开…"],"家电家居":["560880 广发中证全指家用电器交易…","515730 永赢中证家居家电交易型开…","512430 华泰柏瑞中证家居家电交易…","515640 华夏中证全指家用电器交易…","561120 富国中证全指家用电器交易…"],"半导体芯片":["588170 华夏上证科创板半导体材料…","588200 嘉实上证科创板芯片交易型…","512480 国联安中证全指半导体产品…","588710 华泰柏瑞上证科创板半导体…","560780 广发中证半导体材料设备主…","512760 国泰CES半导体芯片行业…","562590 华夏中证半导体材料设备主…","561980 招商中证半导体产业交易型…","589020 鹏华上证科创板半导体材料…","588290 华安上证科创板芯片交易型…","589130 易方达上证科创板芯片交易…","589190 华宝上证科创板芯片交易型…","513310 华泰柏瑞中证韩交所中韩半…","588890 南方上证科创板芯片交易型…","588750 汇添富上证科创板芯片交易…","589070 天弘上证科创板芯片设计主…","588810 富国上证科创板芯片交易型…","516350 易方达中证芯片产业交易型…","516640 富国中证芯片产业交易型开…","589210 广发上证科创板芯片设计主…","588780 国联安上证科创板芯片设计…","589030 易方达上证科创板芯片设计…","589100 国泰上证科创板芯片交易型…","515260 华宝中证电子50交易型开…","516920 汇添富中证芯片产业交易型…","562820 嘉实中证全指集成电路交易…","588920 鹏华上证科创板芯片交易型…","589260 国泰上证科创板芯片设计主…","589160 广发上证科创板芯片交易型…","588990 博时上证科创板芯片交易型…","589170 鹏华上证科创板芯片设计主…","515320 华安中证电子50交易型开…","589250 浦银安盛上证科创板芯片设…"],"互联网":["513050 易方达中证海外中国互联网…","513770 华宝中证港股通互联网交易…","513040 易方达中证港股通互联网交…","520650 南方中证港股通互联网交易…","520910 华夏中证港股通互联网交易…","520790 兴业中证港股通互联网交易…","520630 广发中证港股通互联网交易…","513220 招商中证全球中国互联网交…","517050 华泰柏瑞中证沪港深互联网…","513720 国泰中证港股通互联网交易…","517200 嘉实中证沪港深互联网交易…"],"畜牧养殖":["516670 招商中证畜牧养殖交易型开…","516760 平安中证畜牧养殖交易型开…","512450 广发中证畜牧养殖产业交易…"],"农业":["512620 天弘中证农业主题交易型开…","516810 华夏中证农业主题交易型开…","560210 景顺长城中证全指农牧渔交…","562900 易方达中证现代农业主题交…","516550 嘉实中证大农业交易型开放…"],"券商":["512000 华宝中证全指证券公司交易…","512880 国泰中证全指证券公司交易…","513090 易方达中证香港证券投资主…","512900 南方中证全指证券公司交易…","512570 易方达中证全指证券公司交…","560090 汇添富中证全指证券公司交…","515010 华夏中证全指证券公司交易…","562870 嘉实中证全指证券公司交易…","515850 富国中证全指证券公司交易…","516200 华安中证全指证券公司交易…","516730 浦银安盛中证证券公司30…","515560 建信中证全指证券公司交易…","560400 华泰柏瑞中证全指证券公司…","510200 汇安上证证券交易型开放式…","516980 华富中证证券公司先锋策略…","501016 国泰中证申万证券行业指数…","501047 汇添富中证全指证券公司交…","502010 易方达中证全指证券公司指…","502053 长盛中证全指证券公司指数…"],"光伏":["515790 华泰柏瑞中证光伏产业交易…","515370 华夏中证光伏产业交易型开…","516880 银华中证光伏产业交易型开…","516290 汇添富中证光伏产业交易型…","516230 招商中证光伏产业交易型开…","560980 广发中证光伏龙头30交易…","562970 易方达中证光伏产业交易型…","560310 博时中证光伏产业交易型开…","516180 平安中证光伏产业交易型开…","560230 富国中证光伏产业交易型开…"],"工程机械":["560280 广发中证工程机械主题交易…","515970 华夏中证工程机械主题交易…","516250 富国中证工程机械主题交易…","516960 国泰中证细分机械设备产业…"],"A股全指":["563360 华泰柏瑞中证A500交易…","510210 上证综指交易型开放式指数…","512050 华夏中证A500交易型开…","563800 广发中证A500交易型开…","563220 富国中证A500交易型开…","510760 国泰上证综合交易型开放式…","560610 招商中证A500交易型开…","560530 摩根中证A500交易型开…","560510 泰康中证A500交易型开…","563880 汇添富中证A500交易型…","530060 易方达上证综合交易型开放…","512020 鹏华中证A500交易型开…","510980 汇添富上证综合交易型开放…","563500 华宝中证A500交易型开…","512080 中金中证A500交易型开…","512370 华夏中证A500增强策略…","563860 海富通中证A500交易型…","561090 华安中证A500增强策略…","563650 兴业中证A500交易型开…","563550 摩根中证A500增强策略…","560750 申万菱信中证A500交易…","563600 易方达中证A500增强策…","563660 银河中证A500交易型开…","562810 嘉实上证综合增强策略交易…","563330 华泰柏瑞中证A股交易型开…","563630 国联安中证A500增强策…","563930 招商上证综合增强策略交易…"],"船舶":["560710 富国中证智选船舶产业交易…"],"航空航天":["563230 富国中证卫星产业交易型开…","512630 广发中证卫星产业交易型开…","563530 易方达中证卫星产业交易型…","563790 鹏华中证卫星产业交易型开…","563380 华泰柏瑞中证全指航空航天…","563320 华泰柏瑞中证通用航空主题…","563870 鹏华中证通用航空主题交易…","561660 平安中证通用航空主题交易…"],"港红利股息":["513530 华泰柏瑞中证港股通高股息…","520990 景顺长城中证国新港股通央…","513910 华夏中证港股通央企红利交…","520660 南方中证国新港股通央企红…","513820 汇添富中证港股通高股息投…","520900 广发中证国新港股通央企红…","520810 易方达中证港股通高股息投…","513830 嘉实中证港股通高股息投资…","501305 汇添富中证港股通高股息投…","501307 银河中证沪港深高股息指数…"],"A股大盘":["510300 华泰柏瑞沪深300交易型…","510310 易方达沪深300交易型开…","510050 上证50交易型开放式指数…","510330 华夏沪深300交易型开放…","515330 天弘沪深300交易型开放…","510180 上证180交易型开放式指…","515390 华安沪深300交易型开放…","510360 广发沪深300交易型开放…","510380 国寿安保沪深300交易型…","563080 易方达中证A50交易型开…","510100 易方达上证50交易型开放…","561300 国泰沪深300增强策略交…","530000 天弘上证50交易型开放式…","510320 中金沪深300交易型开放…","510350 工银瑞信沪深300交易型…","560350 摩根中证A50交易型开放…","515380 泰康沪深300交易型开放…","515660 国联安沪深300交易型开…","562070 华宝沪深300增强策略交…","562000 华宝中证A100交易型开…","563520 永赢沪深300交易型开放…","561230 工银瑞信中证A50交易型…","515310 汇添富沪深300交易型开…","561990 招商沪深300增强策略交…","562890 嘉实中证A50交易型开放…","561930 招商沪深300交易型开放…","510800 建信上证50交易型开放式…","510670 华夏上证180交易型开放…","563350 华泰柏瑞中证A50交易型…","510390 平安沪深300交易型开放…","560380 南方中证A100交易型开…","530050 东财上证50交易型开放式…","515130 博时沪深300交易型开放…","510950 广发上证50交易型开放式…","512910 广发中证A100交易型开…","512250 招商中证A50交易型开放…","510710 博时上证50交易型开放式…","530680 兴业上证180交易型开放…","510370 兴业沪深300交易型开放…","561880 华富中证A100交易型开…","530180 易方达上证180交易型开…","563090 易方达上证50增强策略交…","561750 博时中证A50交易型开放…","561000 华安沪深300增强策略交…","561180 富国中证A100交易型开…","512030 易方达中证A50增强策略…","530580 南方上证180交易型开放…","510850 工银瑞信上证50交易型开…","560820 新华中证A50交易型开放…","561770 博时中证A100交易型开…","510020 上证超级大盘交易型开放式…","515360 方正富邦沪深300交易型…","530280 平安上证180交易型开放…","530300 华泰柏瑞上证180交易型…","510040 鹏华上证180交易型开放…","561200 工银瑞信中证A100交易…","510190 华安上证50交易型开放式…","530800 银华上证180交易型开放…","512240 鹏华中证A50交易型开放…","510680 万家上证50交易型开放式…","530080 天弘上证180交易型开放…","510600 申万菱信上证50交易型开…","515350 民生加银沪深300交易型…","512060 天弘中证A100交易型开…","501043 汇添富沪深300指数型发…","501060 中金中证优选300指数证…","502048 易方达上证50指数证券投…"],"价值策略":["512040 富国中证价值交易型开放式…","563960 兴全沪深300质量交易型…","562530 华夏中证智选1000价值…","510030 上证180价值交易型开放…","588910 建信上证智选科创板创新价…","561500 华泰柏瑞中证企业核心竞争…","562320 银华沪深300价值交易型…","512750 嘉实中证锐联基本面50交…","589550 华夏上证智选科创板价值5…","560030 汇添富中证800价值交易…","560330 申万菱信沪深300价值交…","562330 银华中证500价值交易型…","560650 民生加银中证企业核心竞争…"],"红利低波":["512890 华泰柏瑞中证红利低波动交…","563020 易方达中证红利低波动交易…","515100 景顺长城中证红利低波动1…","515300 嘉实沪深300红利低波动…","560570 国联安中证A500红利低…","560150 泰康中证红利低波动交易型…","561680 平安中证A500红利低波…","563510 易方达中证A500红利低…","563980 鑫元中证800红利低波动…","560520 大成中证红利低波动100…","563590 国寿安保中证A500红利…","563690 永赢中证红利低波动交易型…","512260 华安中证500行业中性低…"],"金融科技":["516100 华夏中证金融科技主题交易…","516860 博时中证金融科技主题交易…","515720 富国中证金融科技主题交易…","563670 鹏华中证金融科技主题交易…","563570 兴业中证金融科技主题交易…"],"A股中盘":["510500 中证500交易型开放式指…","515800 中证800交易型开放式指…","512500 华夏中证500交易型开放…","561550 华泰柏瑞中证500增强策…","510580 易方达中证500交易型开…","510510 广发中证500交易型开放…","512510 华泰柏瑞中证500交易型…","515810 易方达中证800交易型开…","563750 汇添富中证500交易型开…","515190 中银证券中证500交易型…","563030 易方达中证500增强策略…","530380 易方达上证380交易型开…","510590 平安中证500交易型开放…","561350 国泰中证500交易型开放…","561950 招商中证500增强策略交…","560100 南方中证500增强策略交…","510290 上证380交易型开放式指…","510560 国寿安保中证500交易型…","510570 兴业中证500交易型开放…","510530 工银瑞信中证500交易型…","510130 易方达上证中盘交易型开放…","510550 方正富邦中证500交易型…","515550 国联中证500交易型开放…","560950 汇添富中证500增强策略…","515530 泰康中证500交易型开放…","501036 汇添富中证500交易型开…","502000 西部利得中证500指数增…"],"A股小盘":["512100 南方中证1000交易型开…","563300 华泰柏瑞中证2000交易…","560010 广发中证1000交易型开…","562660 华夏中证2000交易型开…","560110 汇添富中证1000交易型…","530530 华夏上证580交易型开放…","530100 易方达上证580交易型开…","561590 华泰柏瑞中证1000增强…","561280 工银瑞信中证1000增强…","560220 广发中证2000交易型开…","563200 富国中证2000交易型开…","516300 华泰柏瑞中证1000交易…","561370 国泰中证2000交易型开…","561780 博时中证1000增强策略…","560590 鹏华中证1000增强策略…"],"科创债":["551520 汇添富中证AAA科技创新…","551550 华夏中证AAA科技创新公…","551500 易方达中证AAA科技创新…","551030 鹏华上证AAA科技创新公…","551560 兴业中证AAA科技创新公…","551510 华泰柏瑞中证AAA科技创…","511120 广发上证AAA科技创新公…","511150 永赢上证AAA科技创新公…","551900 招商中证AAA科技创新公…","551800 国泰中证AAA科技创新公…","551580 泰康中证AAA科技创新公…","551000 博时上证AAA科技创新公…","551300 摩根上证AAA科技创新公…","551060 中银上证AAA科技创新公…"],"创新药":["515120 广发中证创新药产业交易型…","513120 广发中证香港创新药交易型…","589720 国泰上证科创板创新药交易…","516080 易方达中证创新药产业交易…","516820 平安中证医药及医疗器械创…","513780 景顺长城中证港股通创新药…","589120 汇添富上证科创板创新药交…","517110 国泰中证沪港深创新药产业…","520970 嘉实中证港股通创新药交易…","520700 万家中证港股通创新药交易…","517120 华泰柏瑞中证沪港深创新药…","516060 工银瑞信中证创新药产业交…","560900 摩根中证创新药产业交易型…"],"新能源综合":["516090 易方达中证新能源交易型开…","516160 南方中证新能源交易型开放…","588830 鹏华上证科创板新能源交易…","516270 华安中证内地新能源主题交…","588960 富国上证科创板新能源交易…","589960 易方达上证科创板新能源交…","516580 博时中证新能源交易型开放…","516850 华夏中证新能源交易型开放…"],"智能制造与机器人":["562500 华夏中证机器人交易型开放…","560770 招商中证机器人交易型开放…","562360 银华中证机器人交易型开放…","516800 华宝中证智能制造主题交易…","560630 万家中证机器人交易型开放…"],"现金流策略":["563390 华泰柏瑞中证全指自由现金…","563760 中银中证全指自由现金流交…","560120 华夏中证500自由现金流…","562080 华宝沪深300自由现金流…","563900 摩根沪深300自由现金流…","516460 鹏华中证800自由现金流…","563990 富国中证800自由现金流…","563580 万家中证800自由现金流…","563780 方正富邦中证全指自由现金…","563830 博时中证全指自由现金流交…","563680 汇添富中证800自由现金…","561870 华富中证全指自由现金流交…","563620 兴业中证全指自由现金流交…","563770 招商中证全指自由现金流交…","561080 华安中证全指自由现金流交…","512130 鹏华中证全指自由现金流交…"],"新材料":["588010 博时上证科创板新材料交易…","588160 南方上证科创板新材料交易…","589180 汇添富上证科创板新材料交…","516710 华夏中证新材料主题交易型…","516360 华宝中证新材料主题交易型…","516890 平安中证新材料主题交易型…"],"成长策略":["588020 易方达上证科创板成长交易…","588110 广发上证科创板成长交易型…","562310 银华沪深300成长交易型…","560500 鹏扬中证500质量成长交…","589700 南方上证科创板成长交易型…","588070 万家上证科创板成长交易型…","562520 华夏中证智选1000成长…","562340 银华中证500质量成长交…"],"云计算与数据":["516510 易方达中证云计算与大数据…","515400 富国中证大数据产业交易型…","516000 华夏中证大数据产业交易型…","516630 华夏中证云计算与大数据主…","560800 鹏扬中证数字经济主题交易…","516700 华宝中证大数据产业交易型…","517390 天弘中证沪港深云计算产业…","560660 新华中证云计算50交易型…","516260 华夏中证物联网主题交易型…","561220 工银瑞信中证诚通国企数字…","517660 天弘中证沪港深物联网主题…","516330 华泰柏瑞中证物联网主题交…"],"生物医药":["512290 国泰中证生物医药交易型开…","588130 华夏上证科创板生物医药交…","588700 嘉实上证科创板生物医药交…","588860 工银瑞信上证科创板生物医…","588250 鹏华上证科创板生物医药交…","516500 华夏中证生物科技主题交易…","516930 民生加银中证生物科技主题…","501009 汇添富中证生物科技主题指…"],"央国企改革":["510810 中证上海国企交易型开放式…","512950 华夏中证央企结构调整交易…","512960 博时中证央企结构调整交易…","515900 博时中证央企创新驱动交易…","515680 嘉实中证央企创新驱动交易…","515600 广发中证央企创新驱动交易…","560700 广发中证国新央企股东回报…","563060 易方达中证国资央企50交…","515760 华夏中证浙江国资创新发展…","560070 汇添富中证国新央企股东回…","561960 招商中证国新央企股东回报…","513810 华夏中证香港内地国有企业…","510060 上证中央企业50交易型开…","510270 上证国有企业100交易型…","502006 易方达中证国有企业改革指…"],"高端装备":["562910 易方达中证装备产业交易型…","516320 华夏中证装备产业交易型开…","588850 嘉实上证科创板工业机械交…"],"信用债":["511110 易方达上证基准做市公司债…","511070 南方上证基准做市公司债交…","511200 华夏上证基准做市公司债交…","511190 海富通上证基准做市公司债…"],"公用事业":["560620 万家中证全指公用事业交易…","560190 鹏华中证全指公用事业交易…"],"短期利率债":["511580 招商中证国债及政策性金融…","511160 东财中证1-3年国债交易…"],"ESG治理":["560810 融通中证诚通央企ESG交…","510010 上证180公司治理交易型…","516830 富国沪深300ESG基准…","510990 工银瑞信中证180ESG…","561900 招商沪深300ESG基准…","510090 上证社会责任交易型开放式…","515090 博时中证可持续发展100…","560180 南方沪深300ESG基准…","516720 浦银安盛中证ESG120…"],"油气":["561360 国泰中证油气产业交易型开…","561760 博时中证油气资源交易型开…","561570 华泰柏瑞中证油气产业交易…","563150 银华中证油气资源交易型开…"],"贵金属":["517520 永赢中证沪深港黄金产业股…","517400 国泰中证沪深港黄金产业股…"],"通信":["515880 国泰中证全指通信设备交易…","515050 华夏中证5G通信主题交易…","563010 易方达中证电信主题交易型…","560300 汇添富中证电信主题交易型…","560690 鹏华中证电信主题交易型开…"],"超长期国债":["511130 博时上证30年期国债交易…"],"消费综合":["515650 富国中证消费50交易型开…","510150 上证消费80交易型开放式…","512600 嘉实中证主要消费交易型开…","513070 易方达中证港股通消费主题…","516130 华宝中证消费龙头交易型开…","510630 上证主要消费交易型开放式…","513230 华夏中证港股通消费主题交…","560680 广发中证主要消费交易型开…","513590 鹏华中证港股通消费主题交…","516600 工银瑞信中证消费服务领先…","517550 招商中证沪港深消费龙头交…","515920 博时中证智能消费主题交易…","562580 华夏中证全指可选消费交易…","501089 方正富邦中证主要消费红利…","501090 华宝中证消费龙头交易型开…"],"中长期利率债":["511260 上证10年期国债交易型开…","511100 华夏上证基准做市国债交易…","511010 上证5年期国债交易型开放…","511020 平安中证5-10年期国债…"],"医疗器械":["562600 华夏中证全指医疗器械交易…","501005 汇添富中证精准医疗主题指…"],"保险与非银":["512070 易方达沪深300非银行金…","513750 广发中证港股通非银行金融…","515630 鹏华中证800证券保险交…"],"金融综合":["513190 华夏中证港股通内地金融交…","510230 上证180金融交易型开放…","513140 华泰柏瑞中证港股通金融服…","512640 嘉实中证金融地产交易型开…","510650 上证金融地产交易型开放式…"],"能源综合":["562850 嘉实中证国新央企现代能源…","561790 博时中证国新央企现代能源…","561260 工银瑞信中证国新央企现代…"],"疫苗":["562860 嘉实中证疫苗与生物技术交…","561920 招商中证疫苗与生物技术交…"],"风电与绿色能源":["562010 华宝中证绿色能源交易型开…"],"交通物流":["516910 富国中证现代物流交易型开…","561320 国泰中证内地运输主题交易…","516530 银华中证现代物流交易型开…"],"中药":["560080 汇添富中证中药交易型开放…","562390 银华中证中药交易型开放式…","561510 华泰柏瑞中证中药交易型开…","501011 汇添富中证中药交易型开放…"],"环保与碳中和":["517160 南方中证长江保护主题交易…","517330 易方达中证长江保护主题交…","512580 广发中证环保产业交易型开…","562990 易方达中证上海环交所碳中…","516070 易方达中证内地低碳经济主…","561190 富国中证上海环交所碳中和…","560550 广发中证上海环交所碳中和…","560060 汇添富中证上海环交所碳中…","560560 泰康中证内地低碳经济主题…","562300 银华中证内地低碳经济主题…","501030 汇添富中证环境治理指数型…"],"区域发展":["515150 富国中证国企一带一路交易…","512190 浙商汇金中证浙江凤凰行动…","515110 易方达中证国企一带一路交…","512770 战略新兴成指交易型开放式…","515990 汇添富中证国企一带一路交…","515200 申万菱信中证研发创新10…","517850 汇添富中证沪港深张江自主…","512650 中证长三角一体化发展主题…","512870 南华中证杭州湾区交易型开…","510770 申万菱信上证G60战略新…","512970 平安中证粤港澳大湾区发展…","502013 长盛中证申万一带一路主题…"],"银行":["512800 华宝中证银行交易型开放式…","515290 天弘中证银行交易型开放式…","516310 易方达中证银行交易型开放…","512700 南方中证银行交易型开放式…","515020 华夏中证银行交易型开放式…","512820 中证银行交易型开放式指数…","517900 招商中证银行AH价格优选…","516210 华安中证银行交易型开放式…","512730 鹏华中证银行交易型开放式…","501025 鹏华港股通中证香港银行投…"],"消费电子":["562950 易方达中证消费电子主题交…","561100 富国中证消费电子主题交易…","561600 平安中证消费电子主题交易…","561310 国泰中证消费电子主题交易…"],"旅游":["562510 华夏中证旅游主题交易型开…"],"传媒游戏":["512980 广发中证传媒交易型开放式…","516010 国泰中证动漫游戏交易型开…","516620 国泰中证影视主题交易型开…","516770 华泰柏瑞中证动漫游戏交易…","517770 浦银安盛中证沪港深游戏及…","516190 华夏中证文娱传媒交易型开…"],"品牌消费":["561130 富国中证新华社民族品牌工…","517880 华泰柏瑞中证沪港深品牌消…"],"建筑材料":["516750 富国中证全指建筑材料交易…"],"沪深港宽基":["517300 国寿安保中证沪港深300…","517080 汇添富中证沪港深500交…","517100 富国中证沪港深500交易…","517000 银华中证沪港深500交易…","517030 易方达中证沪港深300交…","517010 易方达中证沪港深500交…","517170 华夏中证沪港深500交易…"],"养老服务":["516560 华宝中证养老产业交易型开…"],"医疗服务与互联网医疗":["516610 大成中证全指医疗保健设备…","516790 华泰柏瑞中证全指医疗保健…","501007 汇添富中证互联网医疗主题…"],"基础设施":["516970 广发中证基建工程交易型开…","516950 银华中证基建交易型开放式…"],"石化化工":["516120 富国中证细分化工产业主题…","516020 华宝中证细分化工产业主题…","516570 易方达中证石化产业交易型…","516220 国泰中证细分化工产业主题…"],"教育":["513360 博时中证全球中国教育主题…"],"新能源汽车":["515030 华夏中证新能源汽车交易型…","515700 平安中证新能源汽车产业交…","516390 汇添富中证新能源汽车产业…","516660 华安中证新能源汽车交易型…","516380 华宝中证智能电动汽车交易…","516590 易方达中证智能电动汽车交…","501057 汇添富中证新能源汽车产业…"],"国防军工":["512710 富国中证军工龙头交易型开…","512660 国泰中证军工交易型开放式…","512680 广发中证军工交易型开放式…","512670 鹏华中证国防交易型开放式…","512560 易方达中证军工交易型开放…","512810 华宝中证军工交易型开放式…","502003 易方达中证军工指数证券投…"],"港股宽基":["513550 华泰柏瑞中证港股通50交…","513900 华安CES港股通精选10…","513990 招商上证港股通交易型开放…"],"短期融资券":["511360 海富通中证短融交易型开放…"],"可转债与可交换债":["511380 博时中证可转债及可交换债…","511180 海富通上证投资级可转债及…"],"钢铁":["515210 国泰中证钢铁交易型开放式…"],"煤炭":["515220 国泰中证煤炭交易型开放式…"],"房地产":["512200 南方中证全指房地产交易型…","515060 华夏中证全指房地产交易型…"],"综合策略":["510160 中证南方小康产业交易型开…","515590 前海开源中证500等权重…","501050 华夏沪港通上证50AH优…"],"地方政府债":["511270 上证10年期地方政府债交…","511060 海富通上证5年期地方政府…"],"白酒":["512690 鹏华中证酒交易型开放式指…"],"城投债":["511220 上证城投债交易型开放式指…"],"资源综合":["510410 上证自然资源交易型开放式…","510170 上证大宗商品股票交易型开…"]};
+window._etfs = ETFS;
+window.CHARTS_DATA = {};
+function catOf(id){ return id.replace(/_c[123]$/,''); }
+function chartById(cid,id){
+  var d=window.CHARTS_DATA[cid]; if(!d){ return null; }
+  for(var k in d){ if(d[k].id===id){ return d[k]; } }
+  return null;
+}
+function ensureCat(cid,cb){
+  if(window.CHARTS_DATA[cid]){ cb(); return; }
+  if(window._chunkReq && window._chunkReq[cid]){ window._chunkReq[cid].push(cb); return; }
+  window._chunkReq=window._chunkReq||{}; window._chunkReq[cid]=[cb];
+  var s=document.createElement('script'); s.src='charts/'+cid+'.js';
+  s.onload=function(){ var q=window._chunkReq[cid]; window._chunkReq[cid]=null; q.forEach(function(f){f();}); };
+  s.onerror=function(){ var q=window._chunkReq[cid]; window._chunkReq[cid]=null; q.forEach(function(f){f();}); };
+  document.head.appendChild(s);
+}
+var _io=new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+    if(!en.isIntersecting){ return; }
+    var el=en.target, id=el.id, cid=catOf(id);
+    _io.unobserve(el);
+    ensureCat(cid,function(){
+      var cfg=window.CHARTS_DATA[cid]?chartById(cid,id):null;
+      if(cfg && typeof renderChart==='function'){ renderChart(id,cfg); }
+      else if(typeof renderChart!=='function'){ el.innerHTML='<div style="padding:48px 12px;text-align:center;color:#8b949e;font-size:13px">图表库 echarts.min.js 加载失败，请刷新重试</div>'; }
+      else{ el.innerHTML='<div style="padding:48px 12px;text-align:center;color:#8b949e;font-size:13px">数据文件 charts/'+cid+'.js 加载失败</div>'; }
+    });
+  });
+},{rootMargin:'320px'});
+document.querySelectorAll('.chart').forEach(function(el){ _io.observe(el); });
+document.querySelectorAll('#tabs button').forEach(function(btn){
+  btn.addEventListener('click', function(){ activateTab(btn); });
+});
+document.querySelectorAll('#ranges button').forEach(function(btn){
+  btn.addEventListener('click', function(){ setRange(btn); });
+});
+</script>
+</body>
+</html>

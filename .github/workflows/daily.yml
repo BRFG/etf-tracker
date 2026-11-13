@@ -1,0 +1,87 @@
+name: daily
+
+on:
+  schedule:
+    # 北京时间 08:45（UTC 00:45），T+1 早上跑，T = 周一~周五
+    - cron: "45 0 * * 2-6"
+    # 北京时间 10:45 再跑一次：深市终值偶发晚于 08:45，全链路幂等，重复跑无副作用
+    - cron: "45 2 * * 2-6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install requests openpyxl
+
+      - name: 还原数据库快照
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p 数据库
+          if gh release download data --pattern "etf.db.gz" --dir /tmp --clobber 2>/dev/null; then
+            gunzip -c /tmp/etf.db.gz > 数据库/etf.db
+            echo "已还原 $(du -h 数据库/etf.db | cut -f1)"
+          else
+            echo "::warning::没有数据库快照，走全量建库（约 40 分钟，仅首次）"
+            python scripts/build_db.py
+          fi
+
+      - name: 增量采集 + 重建两站
+        run: python scripts/collect.py
+
+      - name: 页面自检（库→网页逐格）
+        run: python scripts/check_page.py
+
+      - name: 组装站点
+        run: |
+          mkdir -p site
+          cp 网页/index.html site/index.html
+          cp -r 网页/国家队站 site/
+          cp -r 网页/行业站 site/
+          du -sh site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: 回写数据库快照
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gzip -6 -c 数据库/etf.db > /tmp/etf.db.gz
+          ls -lh /tmp/etf.db.gz
+          if gh release view data >/dev/null 2>&1; then
+            gh release upload data /tmp/etf.db.gz --clobber
+          else
+            gh release create data /tmp/etf.db.gz \
+              -t "etf.db 快照" -n "每日增量后的数据库快照，每次运行覆盖"
+          fi
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

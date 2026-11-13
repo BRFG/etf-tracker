@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国家队ETF动向追踪</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"
+        onerror="document.write('<script src=&quot;https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js&quot;><\/script>')"></script>
+<style>
+  :root{--red:#d9544f;--green:#2fa36b;--blue:#2f6fdd;--ink:#1f2733;--sub:#6b7686;
+        --bg:#f5f7fa;--card:#fff;--line:#e4e9f0;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);
+       color:var(--ink);padding:16px;font-size:14px}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:20px;margin-bottom:2px}
+  .sub{color:var(--sub);font-size:12px;margin-bottom:14px}
+  .banner{background:#fff7e0;border:1px solid #f0d48a;color:#8a6d1d;border-radius:8px;
+          padding:10px 14px;margin-bottom:14px;font-size:13px;display:none}
+  .err{background:#fdecec;border-color:#f0b4b4;color:#a33}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .card .k{font-size:12px;color:var(--sub);margin-bottom:4px}
+  .card .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .card .d{font-size:11px;color:var(--sub);margin-top:2px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;
+         padding:14px;margin-bottom:14px}
+  .panel h2{font-size:15px;margin-bottom:10px}
+  .panel h2 small{font-weight:400;color:var(--sub);font-size:12px;margin-left:8px}
+  .chart{width:100%;height:340px}
+  select{padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;
+         background:#fff;color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--sub);font-weight:500;font-size:12px;cursor:pointer;user-select:none}
+  th:hover{color:var(--blue)}
+  th.l,td.l{text-align:left}
+  tbody tr:hover{background:#f7f9fc}
+  tbody tr.sumrow{background:#f2f5fa;font-weight:600}
+  tfoot td{font-weight:700;border-top:2px solid var(--line)}
+  .pos{color:var(--red)}.neg{color:var(--green)}
+  .tbl{overflow-x:auto}
+  .note{font-size:12px;color:var(--sub);line-height:1.8}
+  .note b{color:var(--ink)}
+  details summary{cursor:pointer;font-size:13px;color:var(--blue);margin-bottom:8px}
+  .foot{text-align:center;color:#9aa4b2;font-size:11px;padding:10px 0 4px}
+  @media (max-width:640px){.chart{height:280px}body{padding:8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>国家队ETF动向追踪（由于数据源问题，ETF动向于每日23:00更新）</h1>
+  <div class="sub" id="updated">加载中…</div>
+  <div class="banner" id="banner"></div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="panel">
+    <h2>每日估算净申赎（监控组合合计）<small>柱：单日净流入(亿元)　线：区间累计</small></h2>
+    <div class="chart" id="chartTotal"></div>
+  </div>
+
+  <div class="panel">
+    <h2>单只ETF明细
+      <select id="etfSel"></select>
+      <small>线：份额(亿份)　柱：当日估算净流入(亿元)</small></h2>
+    <div class="chart" id="chartOne"></div>
+  </div>
+
+  <div class="panel">
+    <h2>最新快照<small>点击表头排序；净流入为全市场申赎估算</small></h2>
+    <div class="tbl"><table id="tbl">
+      <thead><tr>
+        <th class="l" data-k="code">代码</th><th class="l" data-k="name">名称</th>
+        <th class="l" data-k="index">跟踪指数</th>
+        <th data-k="shares">最新份额<br>(亿份)</th><th data-k="dShares">当日变动<br>(亿份)</th>
+        <th data-k="flow1">当日净流入<br>(亿元)</th><th data-k="flow5">近5日<br>(亿元)</th>
+        <th data-k="flow20">近20日<br>(亿元)</th><th data-k="close">最新价</th>
+        <th class="l" data-k="note">国家队持仓备注</th>
+      </tr></thead>
+      <tbody></tbody><tfoot></tfoot>
+    </table></div>
+  </div>
+
+  <div class="panel" id="futPanel" style="display:none">
+    <h2 id="futTitle">股指期货持仓走势<small>净空头 = 持卖单 − 持买单（手）；中金所前20会员排名口径</small></h2>
+    <div class="chart" id="chartFut"></div>
+  </div>
+
+  <div class="panel" id="futTblPanel" style="display:none">
+    <h2>股指期货最新持仓明细（按合约）<small id="futDate"></small></h2>
+    <div class="tbl"><table id="futTbl">
+      <thead><tr><th class="l">品种</th><th class="l">合约</th><th>多头持仓(手)</th><th>多头增减</th>
+      <th>空头持仓(手)</th><th>空头增减</th><th>净空头(手)</th><th>净空头变动</th></tr></thead>
+      <tbody></tbody></table></div>
+  </div>
+
+  <div class="panel">
+    <h2>国家队官方持仓基准 <small id="baseAsof"></small></h2>
+    <div class="tbl"><table id="baseTbl">
+      <thead><tr><th class="l">机构</th><th>持有ETF数</th><th>持仓份额(亿份)</th>
+      <th>持仓市值(亿元)</th><th>平均持仓占比</th></tr></thead><tbody></tbody></table></div>
+    <p class="note" id="baseNote" style="margin-top:8px"></p>
+  </div>
+
+  <div class="panel">
+    <details><summary>方法论与免责声明</summary>
+      <p class="note">
+        <b>监控范围</b>：根据基金定期报告披露的持有人信息，选取中央汇金投资、中央汇金资管、国新投资、中国诚通等"国家队"机构重仓的16只宽基ETF。<br>
+        <b>数据来源</b>：份额数据取自上交所、深交所官方每日披露；价格与成交数据取自东方财富行情接口；期货持仓取自中金所每日公布的各合约前20会员成交持仓排名。<br>
+        <b>估算口径</b>：当日估算净流入 = 份额变动 × 当日成交均价。份额变动为<b>全市场申购赎回的合计结果</b>，国家队是这些ETF的主要持有人（如华泰柏瑞沪深300ETF汇金系占比约83%），但单日变动不能全部归因于国家队，仅作动向参考。<br>
+        <b>期货持仓</b>：提取中信期货席位在IH/IF/IC/IM各合约的多空持仓并按品种汇总。该席位常被市场视为机构（含国家队相关资金）股指套保动向的参考窗口；数据为该会员<b>全部客户合计</b>，净空头上升通常对应套保需求增加。合约到期换月时持仓在近远月间迁移属正常现象，建议看品种合计而非单一合约。<br>
+        <b>官方持仓</b>：国家队确切持仓仅在基金半年报/年报中披露（每年3-4月、8-9月），见上方基准表。日度数据为高频代理指标。<br>
+        <b>免责声明</b>：本页面数据仅供参考，可能存在误差或延迟，不构成任何投资建议。
+      </p>
+    </details>
+  </div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const RED="#d9544f",GREEN="#2fa36b",BLUE="#2f6fdd";
+const fmt=(v,d=1,sign=false)=>v==null||isNaN(v)?"—":(sign&&v>0?"+":"")+v.toLocaleString("zh-CN",{minimumFractionDigits:d,maximumFractionDigits:d});
+const cls=v=>v>0?"pos":v<0?"neg":"";
+const sum=a=>a.reduce((s,x)=>s+(x||0),0);
+
+fetch("data/data.json?t="+Date.now()).then(r=>{
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json();
+}).then(render).catch(e=>{
+  const b=$("banner");b.className="banner err";b.style.display="block";
+  b.textContent=location.protocol==="file:"
+    ?"浏览器不允许本地文件直接读取数据。请在本目录运行 python -m http.server 8000 后访问 http://localhost:8000 预览。"
+    :"数据加载失败（"+e.message+"）。请先在服务器上运行 python3 fetch_daily.py 生成 data/data.json。";
+  $("updated").textContent="";
+});
+
+function render(D){
+  const dates=D.dates,L=dates.length,codes=D.etfs.map(e=>e.code);
+  const charts=[];
+  $("updated").textContent="数据更新："+D.updated+"　|　最新交易日："+(dates[L-1]||"—")+"　|　监控 "+codes.length+" 只国家队重仓ETF";
+  if(D.sample){const b=$("banner");b.style.display="block";
+    b.textContent="⚠ 当前展示为示例数据。在服务器上配置定时任务运行 fetch_daily.py 后，将自动替换为真实数据。";}
+
+  // ---- 汇总序列
+  const totalFlow=dates.map((_,i)=>sum(codes.map(c=>D.series[c].flow[i])));
+  const cumFlow=[];totalFlow.reduce((s,v,i)=>(cumFlow[i]=+(s+v).toFixed(1),s+v),0);
+
+  // ---- 每只ETF最新指标
+  const rows=D.etfs.map(e=>{
+    const s=D.series[e.code],last=(a,from)=>{for(let i=from;i>=0;i--)if(a[i]!=null)return{v:a[i],i};return null};
+    const ls=last(s.shares,L-1),ps=ls?last(s.shares,ls.i-1):null,lc=last(s.close,L-1);
+    return{code:e.code,name:e.name,full:e.full,index:e.index,note:e.gjd_note||"",
+      shares:ls?ls.v:null,dShares:ls&&ps?+(ls.v-ps.v).toFixed(2):null,
+      flow1:s.flow[L-1],flow5:+sum(s.flow.slice(-5)).toFixed(1),flow20:+sum(s.flow.slice(-20)).toFixed(1),
+      close:lc?lc.v:null};
+  });
+
+  // ---- 概览卡片
+  const scale=sum(rows.map(r=>r.shares&&r.close?r.shares*r.close:0));
+  const cards=[["当日估算净流入",fmt(totalFlow[L-1],1,true)+" 亿元",dates[L-1],totalFlow[L-1]],
+    ["近5日累计",fmt(sum(totalFlow.slice(-5)),1,true)+" 亿元","估算净申赎",sum(totalFlow.slice(-5))],
+    ["近20日累计",fmt(sum(totalFlow.slice(-20)),1,true)+" 亿元","估算净申赎",sum(totalFlow.slice(-20))],
+    ["监控组合规模",fmt(scale,0)+" 亿元",fmt(sum(rows.map(r=>r.shares||0)),0)+" 亿份",0]];
+  $("cards").innerHTML=cards.map(c=>'<div class="card"><div class="k">'+c[0]+
+    '</div><div class="v '+cls(c[3])+'">'+c[1]+'</div><div class="d">'+c[2]+"</div></div>").join("");
+
+  // ---- 图1: 合计净流入
+  const ch1=echarts.init($("chartTotal"));charts.push(ch1);
+  ch1.setOption({
+    tooltip:{trigger:"axis",axisPointer:{type:"cross"},
+      valueFormatter:v=>fmt(v,1,true)+" 亿元"},
+    legend:{data:["单日净流入","累计净流入"],top:0},
+    grid:{left:10,right:10,top:30,bottom:50,containLabel:true},
+    xAxis:{type:"category",data:dates,axisLabel:{fontSize:11}},
+    yAxis:[{type:"value",name:"亿元",splitLine:{lineStyle:{color:"#eef1f6"}}},
+           {type:"value",name:"累计",splitLine:{show:false}}],
+    dataZoom:[{type:"inside"},{type:"slider",height:18,bottom:8}],
+    series:[
+      {name:"单日净流入",type:"bar",data:totalFlow.map(v=>({value:v,
+        itemStyle:{color:v>=0?RED:GREEN}}))},
+      {name:"累计净流入",type:"line",yAxisIndex:1,data:cumFlow,symbol:"none",
+        lineStyle:{color:BLUE,width:2}}]
+  });
+
+  // ---- 图2: 单只ETF
+  $("etfSel").innerHTML=D.etfs.map(e=>'<option value="'+e.code+'">'+e.code+" "+e.full+"</option>").join("");
+  const ch2=echarts.init($("chartOne"));charts.push(ch2);
+  function drawOne(code){
+    const s=D.series[code];
+    ch2.setOption({
+      tooltip:{trigger:"axis",axisPointer:{type:"cross"}},
+      legend:{data:["份额(亿份)","净流入(亿元)"],top:0},
+      grid:{left:10,right:10,top:30,bottom:50,containLabel:true},
+      xAxis:{type:"category",data:dates,axisLabel:{fontSize:11}},
+      yAxis:[{type:"value",name:"亿份",scale:true,splitLine:{lineStyle:{color:"#eef1f6"}}},
+             {type:"value",name:"亿元",splitLine:{show:false}}],
+      dataZoom:[{type:"inside"},{type:"slider",height:18,bottom:8}],
+      series:[
+        {name:"份额(亿份)",type:"line",data:s.shares,symbol:"none",connectNulls:true,
+          lineStyle:{color:BLUE,width:2},areaStyle:{color:"rgba(47,111,221,.08)"}},
+        {name:"净流入(亿元)",type:"bar",yAxisIndex:1,
+          data:s.flow.map(v=>({value:v,itemStyle:{color:(v||0)>=0?RED:GREEN}}))}]
+    },true);
+  }
+  drawOne(codes[0]);
+  $("etfSel").onchange=e=>drawOne(e.target.value);
+
+  // ---- 表格(可排序)
+  let sortK="flow1",asc=false;
+  function drawTable(){
+    const rs=[...rows].sort((a,b)=>{
+      let x=a[sortK],y=b[sortK];
+      if(typeof x==="string")return asc?x.localeCompare(y):y.localeCompare(x);
+      x=x==null?-Infinity:x;y=y==null?-Infinity:y;return asc?x-y:y-x;});
+    $("tbl").querySelector("tbody").innerHTML=rs.map(r=>"<tr>"+
+      '<td class="l">'+r.code+'</td><td class="l" title="'+r.full+'">'+r.full+"</td>"+
+      '<td class="l">'+r.index+"</td><td>"+fmt(r.shares)+"</td>"+
+      '<td class="'+cls(r.dShares)+'">'+fmt(r.dShares,2,true)+"</td>"+
+      '<td class="'+cls(r.flow1)+'">'+fmt(r.flow1,1,true)+"</td>"+
+      '<td class="'+cls(r.flow5)+'">'+fmt(r.flow5,1,true)+"</td>"+
+      '<td class="'+cls(r.flow20)+'">'+fmt(r.flow20,1,true)+"</td>"+
+      "<td>"+fmt(r.close,3)+'</td><td class="l" style="max-width:260px;white-space:normal;font-size:12px;color:var(--sub)">'+r.note+"</td></tr>").join("");
+    $("tbl").querySelector("tfoot").innerHTML="<tr><td class='l' colspan='3'>合计</td>"+
+      "<td>"+fmt(sum(rows.map(r=>r.shares||0)),0)+"</td>"+
+      "<td class='"+cls(sum(rows.map(r=>r.dShares||0)))+"'>"+fmt(sum(rows.map(r=>r.dShares||0)),1,true)+"</td>"+
+      "<td class='"+cls(totalFlow[L-1])+"'>"+fmt(totalFlow[L-1],1,true)+"</td>"+
+      "<td class='"+cls(sum(totalFlow.slice(-5)))+"'>"+fmt(sum(totalFlow.slice(-5)),1,true)+"</td>"+
+      "<td class='"+cls(sum(totalFlow.slice(-20)))+"'>"+fmt(sum(totalFlow.slice(-20)),1,true)+"</td>"+
+      "<td></td><td></td></tr>";
+  }
+  drawTable();
+  $("tbl").querySelectorAll("th").forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k;if(!k)return;
+    asc=(k===sortK)?!asc:false;sortK=k;drawTable();});
+
+  // ---- 期货: 中信席位持仓
+  const F=D.futures;
+  if(F&&F.latest&&F.latest.date){
+    $("futPanel").style.display="";$("futTblPanel").style.display="";
+    $("futTitle").firstChild.textContent=F.member+"股指期货持仓走势";
+    if(F.latest.date&&F.latest.date!==dates[L-1])
+      $("updated").textContent+="（期货已更新至 "+F.latest.date+"）";
+    const fdates=(F.dates&&F.dates.length)?F.dates:dates;
+    const colors={IH:"#8a63d2",IF:BLUE,IC:"#e2984c",IM:"#38a1a8"};
+    const chF=echarts.init($("chartFut"));charts.push(chF);
+    chF.setOption({
+      tooltip:{trigger:"axis",valueFormatter:v=>v==null?"—":Math.round(v).toLocaleString()+" 手"},
+      legend:{data:F.products.map(p=>p+" "+(F.names[p]||"")),top:0},
+      grid:{left:10,right:10,top:30,bottom:50,containLabel:true},
+      xAxis:{type:"category",data:fdates,axisLabel:{fontSize:11}},
+      yAxis:{type:"value",name:"净空头(手)",splitLine:{lineStyle:{color:"#eef1f6"}}},
+      dataZoom:[{type:"inside"},{type:"slider",height:18,bottom:8}],
+      series:F.products.map(p=>({name:p+" "+(F.names[p]||""),type:"line",symbol:"none",
+        connectNulls:true,lineStyle:{width:2,color:colors[p]},itemStyle:{color:colors[p]},
+        data:F.series[p].net_short}))
+    });
+    $("futDate").textContent="交易日 "+F.latest.date+"　·　会员："+F.member+"　·　多空为该会员全部客户合计";
+    let fhtml="",sumRow=[0,0,0,0];
+    F.products.forEach(p=>{
+      const cs=F.latest.contracts[p]||[];if(!cs.length)return;
+      let sub=[0,0,0,0];
+      cs.forEach(c=>{
+        sub[0]+=c[1];sub[1]+=c[2];sub[2]+=c[3];sub[3]+=c[4];
+        fhtml+="<tr><td class='l'>"+p+"</td><td class='l'>"+c[0]+"</td>"+
+          "<td>"+c[1].toLocaleString()+"</td><td class='"+cls(c[2])+"'>"+fmt(c[2],0,true)+"</td>"+
+          "<td>"+c[3].toLocaleString()+"</td><td class='"+cls(c[4])+"'>"+fmt(c[4],0,true)+"</td>"+
+          "<td>"+(c[3]-c[1]).toLocaleString()+"</td>"+
+          "<td class='"+cls(c[4]-c[2])+"'>"+fmt(c[4]-c[2],0,true)+"</td></tr>";});
+      sumRow=sumRow.map((v,i)=>v+sub[i]);
+      fhtml+="<tr class='sumrow'><td class='l'>"+p+" "+(F.names[p]||"")+"</td><td class='l'>小计</td>"+
+        "<td>"+sub[0].toLocaleString()+"</td><td class='"+cls(sub[1])+"'>"+fmt(sub[1],0,true)+"</td>"+
+        "<td>"+sub[2].toLocaleString()+"</td><td class='"+cls(sub[3])+"'>"+fmt(sub[3],0,true)+"</td>"+
+        "<td>"+(sub[2]-sub[0]).toLocaleString()+"</td>"+
+        "<td class='"+cls(sub[3]-sub[1])+"'>"+fmt(sub[3]-sub[1],0,true)+"</td></tr>";});
+    $("futTbl").querySelector("tbody").innerHTML=fhtml;
+    const netChg=sumRow[3]-sumRow[1];
+    $("cards").insertAdjacentHTML("beforeend",'<div class="card"><div class="k">'+F.member+'净空头变动(手)</div><div class="v '+
+      cls(netChg)+'">'+fmt(netChg,0,true)+'</div><div class="d">'+F.latest.date+" 四品种合计</div></div>");
+  }
+
+  // ---- 基准持仓
+  const B=D.baseline;
+  $("baseAsof").textContent=B.asof+"　来源："+B.source;
+  $("baseTbl").querySelector("tbody").innerHTML=B.holders.map(h=>"<tr>"+
+    '<td class="l">'+h.name+"</td><td>"+h.etf_count+"</td><td>"+fmt(h.shares_yi,0)+"</td>"+
+    "<td>"+fmt(h.value_yi,0)+"</td><td>"+(h.avg_pct?fmt(h.avg_pct,1)+"%":"—")+"</td></tr>").join("")+
+    "<tr><td class='l'><b>合计</b></td><td></td><td></td><td><b>"+fmt(B.total_value_yi,0)+"</b></td><td></td></tr>";
+  $("baseNote").textContent=B.note+" 国家队确切持仓每半年随基金定期报告披露一次。";
+
+  $("foot").textContent="数据来源：上交所 / 深交所 / 中金所 / 东方财富　·　仅供参考，不构成投资建议";
+  window.addEventListener("resize",()=>charts.forEach(c=>c.resize()));
+}
+})();
+</script>
+<!-- gjd-etf-tracker v1.1 -->
+</body>
+</html>
