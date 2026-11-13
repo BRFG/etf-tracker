@@ -13,7 +13,7 @@
   "watchlist": [
     {
       "code": "510300",
-      "name": "沪深300ETF",
+      "name": "沪深300ETF华泰柏瑞",
       "full": "华泰柏瑞沪深300ETF",
       "exch": "SH",
       "index": "沪深300",
@@ -45,7 +45,7 @@
     },
     {
       "code": "510050",
-      "name": "上证50ETF",
+      "name": "上证50ETF华夏",
       "full": "华夏上证50ETF",
       "exch": "SH",
       "index": "上证50",
@@ -53,7 +53,7 @@
     },
     {
       "code": "510180",
-      "name": "上证180ETF",
+      "name": "上证180ETF华安",
       "full": "华安上证180ETF",
       "exch": "SH",
       "index": "上证180",
@@ -61,7 +61,7 @@
     },
     {
       "code": "510500",
-      "name": "中证500ETF",
+      "name": "中证500ETF南方",
       "full": "南方中证500ETF",
       "exch": "SH",
       "index": "中证500",
@@ -85,7 +85,7 @@
     },
     {
       "code": "512100",
-      "name": "中证1000ETF",
+      "name": "中证1000ETF南方",
       "full": "南方中证1000ETF",
       "exch": "SH",
       "index": "中证1000",
@@ -117,7 +117,7 @@
     },
     {
       "code": "588000",
-      "name": "科创50ETF",
+      "name": "科创50ETF华夏",
       "full": "华夏上证科创板50ETF",
       "exch": "SH",
       "index": "科创50",
@@ -133,7 +133,7 @@
     },
     {
       "code": "159915",
-      "name": "创业板ETF",
+      "name": "创业板ETF易方达",
       "full": "易方达创业板ETF",
       "exch": "SZ",
       "index": "创业板指",
