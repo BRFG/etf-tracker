@@ -27,7 +27,7 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - run: pip install requests openpyxl
+      - run: pip install -r requirements.txt
 
       - name: 还原数据库快照
         env:
