@@ -6,7 +6,7 @@
 输出: 网页/行业站/ (index.html + charts/*.js + echarts.min.js)
 
 v2 改版:
-  1. 顶部三区布局：各大类规模表居左，近一周增加/减少 TOP5 分居右上右下（仿原站）
+  1. 顶部三区布局：各大类份额表居左，近一周增加/减少 TOP5 分居右上右下（仿原站）
   2. 图表视觉对齐原站：顶部颜色块图例 + 每线终点右侧贴名称标签(endLabel)
   3. 近一周份额变化率：以 100% 为中轴，默认上下限 ±2.5%（超出时自动放宽）
   4. 全图纵轴范围按可见数据动态计算（含 8% 留白），不再依赖自动 scale
@@ -187,8 +187,8 @@ def main():
                 etf_cur[code] = r[0]
                 stale.add(code)
 
-    # 图例/折线悬停：成分 ETF 明细，按最新份额从大到小排列（不展示规模数值）
-    # x=1 标记"已无最新数据"，hover 里用 † 标出，避免把回退值误当成当前规模
+    # 图例/折线悬停：成分 ETF 明细，按最新份额从大到小排列（不展示份额数值）
+    # x=1 标记"已无最新数据"，hover 里用 † 标出，避免把回退值误当成当前份额
     etfs_hover = {}
     for cat, subs in MAPPING.items():
         for s in subs:
@@ -288,7 +288,7 @@ def render_html(dates, cat_rows, top_up, top_down, etfs_hover, stats,
 <section class="cat" id="sec_{H.escape(cat)}" style="display:{"block" if i==0 else "none"}">
 <h2 style="border-left-color:{H.escape(subs[0]['color'] or '#58a6ff')}">{cat_label(cat)}</h2>
 <h3>冷热度：份额变化率的历史分位</h3>
-<table class="stattbl"><thead><tr><th>子类</th><th>当前规模<br>(亿份)</th><th>成分<br>只数</th>
+<table class="stattbl"><thead><tr><th>子类</th><th>当前份额<br>(亿份)</th><th>成分<br>只数</th>
 <th>近3月变化率 · 分位</th><th>近1年变化率 · 分位</th></tr></thead>
 <tbody>{stat_rows}</tbody></table>
 <p class="note"><b>分位口径</b>：近3月 = 每 60 个交易日的份额变化率 r(t)=V(t)/V(t−60)−1，按日滚动计算；
@@ -298,11 +298,11 @@ def render_html(dates, cat_rows, top_up, top_down, etfs_hover, stats,
 
 <div class="card"><h3>ETF份额变化全景分析（亿份）</h3>
 <div class="chart" id="{H.escape(cat)}_c1"></div>
-<p class="note">口径：该子类全部成分 ETF 当日份额合计（交易所清算后数据），单位亿份。<b>鼠标悬停顶部图例色块</b>可查看该子类包含的全部 ETF（按最新规模从大到小排列）。纵轴按可见区间数据自动取值。</p></div>
+<p class="note">口径：该子类全部成分 ETF 当日份额合计（交易所清算后数据），单位亿份。<b>鼠标悬停顶部图例色块</b>可查看该子类包含的全部 ETF（按最新份额从大到小排列）。纵轴按可见区间数据自动取值。</p></div>
 
 <div class="card"><h3>长期份额变化率（各小类首个有效日 = 100%）</h3>
 <div class="chart" id="{H.escape(cat)}_c2"></div>
-<p class="note">口径：以所选区间内该子类的首个有效份额为 100 做归一化，比较不同规模子类的相对扩张速度（非收益率）。</p></div>
+<p class="note">口径：以所选区间内该子类的首个有效份额为 100 做归一化，比较不同份额体量子类的相对扩张速度（非收益率）。</p></div>
 
 <div class="card"><h3>近一周份额变化率（各小类首个有效日 = 100%，纵轴以 100% 为中轴）</h3>
 <div class="chart short" id="{H.escape(cat)}_c3"></div>
@@ -365,8 +365,8 @@ footer{{color:var(--muted);font-size:12px;margin-top:26px;border-top:1px solid v
 {review_block}
 <div class="summary">
 <section>
-<h2>各大类规模与近期区间变动（亿份）</h2>
-<table><thead><tr><th>大类</th><th>当前总规模</th><th>区间首日规模</th><th>变动比例</th></tr></thead>
+<h2>各大类份额与近期区间变动（亿份）</h2>
+<table><thead><tr><th>大类</th><th>当前总份额</th><th>区间首日份额</th><th>变动比例</th></tr></thead>
 <tbody>{tbl_cat()}</tbody></table>
 <p class="note">区间 = 近一周 {D1} 个收盘日（{dates[-D1]} → {dates[-1]}），即 {D1-1} 个交易日变动。</p>
 </section>
