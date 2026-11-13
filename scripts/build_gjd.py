@@ -211,6 +211,9 @@ def main():
             "series": fut_series, "net_total": net_total, "latest": fut_latest,
         },
     }
+    # 干净检出的仓库里没有 网页/国家队站/（页面不纳入版本库，由 CI 现场生成），
+    # 必须先建目录，否则 shutil.copy 会 FileNotFoundError。
+    os.makedirs(OUT, exist_ok=True)
     src = os.path.join(ROOT, "网页", "echarts.min.js")
     if os.path.exists(src):
         shutil.copy(src, os.path.join(OUT, "echarts.min.js"))
