@@ -1,0 +1,24 @@
+name: probe
+
+# 手动触发：验证 runner 所在网络能否访问上交所 / 深交所 / 中金所 / 东方财富。
+# 不写数据库、不部署，只打印连通性结果。
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: 探测四个数据源
+        run: python scripts/probe_remote.py
