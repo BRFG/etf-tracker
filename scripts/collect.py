@@ -244,19 +244,21 @@ def collect_kline(conn, sess):
         elif miss:
             todo.append(e)
             why[code] = f"区间缺 {len(miss)} 天（{miss[0]} ~ {miss[-1]}）"
-        elif not is_evening():
-            # 早间场次：末日已到也要重拉一次。晚间 23:30 抓到的成交额/成交量是
-            # 当日统计的中间态，收盘价虽已定稿，VWAP 仍可能微调；早间不重拉，
-            # 国家队站的净申赎金额就永远停在昨晚那版。
-            todo.append(e)
-            why[code] = "早间终值校正"
+        # 注意：这里**不再**做「早间终值校正」的全量重拉。日 K 线（OHLCV/VWAP）
+        # 是当日收盘后定稿的数据，晚间 23:30 采到的与次日早间采到的完全一致；
+        # 早间再全量重拉 18 只只会多打一倍东财请求、加速触发频率限流，毫无收益。
 
     if not todo:
         print(f"[K线] {len(WATCH)} 只均已追至 {target}，无区间缺口")
         return True
 
     ok, bad, graded = 0, [], []
-    streak = 0                      # 连续取不到目标日数据的只数（限流熔断用）
+    streak = 0                      # 连续取不到目标日数据的只数（限流判据）
+    # 东财对单个出口 IP 的频率限流实测约为「每分钟 6 次」：连续请求约 6~7 只后
+    # 开始 Connection reset。熔断不该放弃剩余，否则 18 只永远追不平（每天 target
+    # 都前进一天，而每次只能追 6 只）。冷却后继续，把 18 只拆成多轮跑完。
+    cool_wait = [90, 180, 300]      # 冷却阶梯（秒），逐轮加长
+    cool_i = 0
     for i, e in enumerate(todo):
         code = e["code"]
         if code in why:
@@ -286,13 +288,19 @@ def collect_kline(conn, sess):
                           f"（东财尚未发布当日 K 线）", file=sys.stderr)
                 bad.append(code)
                 streak += 1
-        # 限流熔断：本机 IP 被东财拉黑时表现为连续 RemoteDisconnected，
-        # 每只 5 次重试要烧 46 秒，18 只就是 14 分钟，而且只会让封禁更久。
-        # 连挂 3 只即判定限流，停止本轮（下次运行自动重试，全链路幂等）。
+        # 连续 3 只取不到 → 判定频率限流：冷却后再继续，而不是放弃剩余。
         if streak >= 3:
-            fail(f"K线连续 {streak} 只取不到 {target} 数据，判定东财限流，"
-                 f"已中止本轮（剩余 {len(todo) - i - 1} 只留待下次运行）")
-            break
+            if cool_i < len(cool_wait):
+                wait = cool_wait[cool_i]
+                cool_i += 1
+                print(f"    ⏳ 连续 {streak} 只被限流，冷却 {wait}s 后继续"
+                      f"（剩余 {len(todo) - i - 1} 只）", file=sys.stderr)
+                time.sleep(wait)
+                streak = 0
+            else:
+                fail(f"K线冷却 {len(cool_wait)} 轮仍被限流，中止本轮"
+                     f"（剩余 {len(todo) - i - 1} 只留待下次运行）")
+                break
         time.sleep(1.5 + random.random())
     print(f"[K线] 需补 {len(todo)} 只，追平 {ok} 只"
           + (f"，终值未确认 {len(graded)} 只" if graded else ""))
