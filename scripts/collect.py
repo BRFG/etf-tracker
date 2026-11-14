@@ -40,8 +40,8 @@ DB = os.path.join(ROOT, "数据库", "etf.db")
 PY = sys.executable
 
 from build_db import (fetch_sse_day, fetch_szse_window, fetch_kline,  # noqa: E402
-                      fetch_cffex_day, make_session, open_db, WATCH,
-                      FUT_PRODUCTS)
+                      fetch_kline_batch, fetch_cffex_day, make_session,
+                      open_db, WATCH, FUT_PRODUCTS)
 
 FAILS = []      # 致命失败：本次未采到，必须告警
 NOTES = []      # 提示信息
@@ -253,13 +253,31 @@ def collect_kline(conn, sess):
         return True
 
     ok, bad, graded = 0, [], []
+    # 批量快照优先：push2 实时接口一次请求拿 todo 全体的当日收盘价+VWAP，
+    # 走的是与 push2his 不同的域名/接口，不受「每分钟 6 次」频率限流影响。
+    # 每日增量的常态是「18 只都只缺最新一天」，批量一次即可追平，push2his
+    # 只用来兜底批量拿不到的标的（停牌/无行情）与历史大缺口。
+    snap = fetch_kline_batch(sess, [e["code"] for e in todo])
+    for e in list(todo):
+        code = e["code"]
+        if code in snap:
+            close, vwap, amt = snap[code]
+            conn.execute("INSERT OR REPLACE INTO kline VALUES(?,?,?,?,?)",
+                         (target, code, close, vwap, amt))
+            conn.commit()
+            ok += 1
+    hist_todo = [e for e in todo if e["code"] not in snap]
+    if snap:
+        print(f"[K线] 批量快照追平 {ok} 只（1 次请求），"
+              f"剩余 {len(hist_todo)} 只走历史接口")
+
     streak = 0                      # 连续取不到目标日数据的只数（限流判据）
-    # 东财对单个出口 IP 的频率限流实测约为「每分钟 6 次」：连续请求约 6~7 只后
-    # 开始 Connection reset。熔断不该放弃剩余，否则 18 只永远追不平（每天 target
-    # 都前进一天，而每次只能追 6 只）。冷却后继续，把 18 只拆成多轮跑完。
+    # push2his 对单个出口 IP 的频率限流实测约为「每分钟 6 次」：连续请求约 6~7 只后
+    # 开始 Connection reset。熔断不该放弃剩余，否则缺口永远补不平。冷却后继续，
+    # 把剩余的拆成多轮跑完（批量快照没拿到的通常是少数，这里一般很快）。
     cool_wait = [90, 180, 300]      # 冷却阶梯（秒），逐轮加长
     cool_i = 0
-    for i, e in enumerate(todo):
+    for i, e in enumerate(hist_todo):
         code = e["code"]
         if code in why:
             print(f"  · {code} {why[code]}")
@@ -294,12 +312,12 @@ def collect_kline(conn, sess):
                 wait = cool_wait[cool_i]
                 cool_i += 1
                 print(f"    ⏳ 连续 {streak} 只被限流，冷却 {wait}s 后继续"
-                      f"（剩余 {len(todo) - i - 1} 只）", file=sys.stderr)
+                      f"（剩余 {len(hist_todo) - i - 1} 只）", file=sys.stderr)
                 time.sleep(wait)
                 streak = 0
             else:
                 fail(f"K线冷却 {len(cool_wait)} 轮仍被限流，中止本轮"
-                     f"（剩余 {len(todo) - i - 1} 只留待下次运行）")
+                     f"（剩余 {len(hist_todo) - i - 1} 只留待下次运行）")
                 break
         time.sleep(1.5 + random.random())
     print(f"[K线] 需补 {len(todo)} 只，追平 {ok} 只"
