@@ -196,7 +196,8 @@ def fetch_szse_range(sess, s: date, e: date, depth=0):
     return left + right
 
 
-def fetch_kline(sess, code):
+def fetch_kline(sess, code, end=None):
+    """end 缺省为北京昨天；晚间 23:30 场次要传当天，否则永远拿不到当日 K 线。"""
     secid = ("1." if code[0] == "5" else "0.") + code
     url = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
     params = {
@@ -204,7 +205,7 @@ def fetch_kline(sess, code):
         "fields1": "f1,f2,f3,f4,f5,f6",
         "fields2": "f51,f52,f53,f54,f55,f56,f57",
         "beg": GJD_START.strftime("%Y%m%d"),
-        "end": yesterday().strftime("%Y%m%d"),
+        "end": (end or yesterday()).strftime("%Y%m%d"),
     }
     for attempt in range(5):
         try:
@@ -222,9 +223,16 @@ def fetch_kline(sess, code):
                     continue
             return out
         except Exception as ex:
+            # 连接层被直接掐断（RemoteDisconnected 是东财限流/封 IP 的典型表现），
+            # 退避多久都难恢复，重试 5 次只会让封禁更久、把本机调试拖成 2 分钟以上；
+            # 缩短为 2 次尝试，把重试预算留给下一轮运行（全链路幂等）。
+            # 超时、5xx、解析失败等才是瞬时故障，仍按原退避重试。
+            hard = isinstance(ex, (requests.ConnectionError,
+                                   requests.exceptions.ChunkedEncodingError))
             print(f"  ! K线 {code} 第{attempt+1}次失败: {ex}", file=sys.stderr)
-            # 东财限流表现为 RemoteDisconnected，需拉长间隔退避
-            time.sleep(3 * (attempt + 1))
+            if hard and attempt >= 1:
+                break
+            time.sleep(2 if hard else 3 * (attempt + 1))
     return []
 
 
