@@ -36,7 +36,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: 还原数据库快照
+      - name: 还原数据库与页面快照
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -47,6 +47,14 @@ jobs:
           else
             echo "::warning::没有数据库快照，走全量建库（约 40 分钟，仅首次）"
             python scripts/build_db.py
+          fi
+          # 上一版页面：某站本次因依赖未就绪而不重建时，用上一版兜底，
+          # 否则 Pages 全量替换会让「没重建的站」直接 404（而不是保留上一版）。
+          if gh release download data --pattern "site.tar.gz" --dir /tmp --clobber 2>/dev/null; then
+            mkdir -p site_prev && tar -xzf /tmp/site.tar.gz -C site_prev
+            echo "已还原上一版 site（$(du -sh site_prev | cut -f1)）"
+          else
+            echo "::warning::没有 site 快照（首次运行，无上一版）"
           fi
 
       - name: 增量采集 + 重建两站
@@ -71,25 +79,32 @@ jobs:
         run: |
           mkdir -p site
           cp 网页/index.html site/index.html
-          cp -r 网页/国家队站 site/
-          cp -r 网页/行业站 site/
+          # 先铺上一版，保证「未重建的站」仍有页面（而不是 404）
+          if [ -d site_prev ]; then
+            [ -d site_prev/国家队站 ] && cp -r site_prev/国家队站 site/
+            [ -d site_prev/行业站 ] && cp -r site_prev/行业站 site/
+          fi
+          # 再用本次重建的覆盖
+          [ -d 网页/国家队站 ] && rm -rf site/国家队站 && cp -r 网页/国家队站 site/
+          [ -d 网页/行业站 ] && rm -rf site/行业站 && cp -r 网页/行业站 site/
           du -sh site
 
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
-      - name: 回写数据库快照
+      - name: 回写数据库与页面快照
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gzip -6 -c 数据库/etf.db > /tmp/etf.db.gz
-          ls -lh /tmp/etf.db.gz
+          tar -czf /tmp/site.tar.gz -C site .
+          ls -lh /tmp/etf.db.gz /tmp/site.tar.gz
           if gh release view data >/dev/null 2>&1; then
-            gh release upload data /tmp/etf.db.gz --clobber
+            gh release upload data /tmp/etf.db.gz /tmp/site.tar.gz --clobber
           else
-            gh release create data /tmp/etf.db.gz \
-              -t "etf.db 快照" -n "每日增量后的数据库快照，每次运行覆盖"
+            gh release create data /tmp/etf.db.gz /tmp/site.tar.gz \
+              -t "etf.db 快照" -n "每日增量后的数据库快照与页面快照，每次运行覆盖"
           fi
 
   deploy:
