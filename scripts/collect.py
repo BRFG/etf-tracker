@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-每日增量采集（计划任务 08:45 运行，用 conda-excel python）
+每日增量采集（每晚 23:30 采当日初值 + 次日早 08:45 采终值，用 conda-excel python）
 
 三个必须机制：
-  1. 追到最新：读库最新日期 -> 逐日追到昨日（自动补周末/节假日/关机漏跑）
+  1. 追到最新：读库最新日期 -> 逐日追到目标日（自动补周末/节假日/关机漏跑）
   2. 0 条 = 非交易日；None / 异常 = 失败，**绝不静默跳过**
   3. 深市初值可被终值覆盖：每日重抓最近 5 个交易日（INSERT OR REPLACE 幂等）
 
@@ -25,6 +25,7 @@
 import argparse
 import json
 import os
+import random
 import sqlite3
 import subprocess
 import sys
@@ -44,13 +45,44 @@ from build_db import (fetch_sse_day, fetch_szse_window, fetch_kline,  # noqa: E4
 
 FAILS = []      # 致命失败：本次未采到，必须告警
 NOTES = []      # 提示信息
+BUILT = []      # 本次成功重建的站点脚本名
+BUILD_ERR = []  # 重建本身报错的站点（页面可能不完整，必须阻止发布）
+ALIGN_LAG = False  # 两市末日不一致但属「晚间时序差」（非致命）：沪已到 T、深 23:20 初值未出
+
+# 退出码约定（workflow 依赖它决定是否发布）：
+#   0 = 全部成功
+#   1 = 致命失败，不发布（份额没采到 / 重建本身报错，页面可能不完整）
+#   2 = 部分降级，可发布（例如东财限流导致国家队站暂不重建，行业站已是最新）
 
 # 已确认剔除、不进映射的标的（深市货币 ETF），避免每天误报"未归类"
 KNOWN_SKIP = {"159001", "159003", "159005"}
 
 
-def beijing_yesterday() -> date:
-    return (datetime.utcnow() + timedelta(hours=8)).date() - timedelta(days=1)
+def beijing_now() -> datetime:
+    return datetime.utcnow() + timedelta(hours=8)
+
+
+def is_evening() -> bool:
+    """当前是否晚间场次（>=20:00）。
+
+    两个场次的**采集范围**不同，不只是目标日不同：
+      · 晚间：从「库内最新日 +1」往后推进 —— 目的是把当日新数据写进来；
+      · 早间：从「库内最新日」原样重抓 —— 目的是把 T 日的初值覆盖成终值。
+    分界点 20:00 比深市 23:20 早很多，Actions 延迟 1~2 小时也不会误判。
+    """
+    return beijing_now().hour >= 20
+
+
+def beijing_target_date() -> date:
+    """本次采集的目标日（北京时间）。
+
+    定时是「每晚 23:30 采当日初值 + 次日早 08:45 采终值」：
+      · 23:30 跑：沪市 23:00、深市 23:20 已发布，目标日 = **当天**；
+      · 08:45 跑：当日尚未收盘，目标日 = **昨天**（只做终值覆盖，不新增日期）。
+    若极端延迟跨了零点，当天日期已 +1，hour<20 取"昨天"恰好仍是原目标日 T。
+    """
+    now = beijing_now()
+    return now.date() if is_evening() else now.date() - timedelta(days=1)
 
 
 def fail(msg):
@@ -71,7 +103,7 @@ def trading_calendar(conn) -> set:
 
 def collect_shares(conn, sess):
     """返回 (沪市是否完整采到, 深市是否完整采到)。"""
-    end = beijing_yesterday()
+    end = beijing_target_date()
     sh_last = conn.execute("SELECT MAX(date) FROM shares WHERE exch='SH'").fetchone()[0]
     sz_last = conn.execute("SELECT MAX(date) FROM shares WHERE exch='SZ'").fetchone()[0]
     if not sh_last or not sz_last:
@@ -87,7 +119,13 @@ def collect_shares(conn, sess):
     # 里从无单日只数下跌超 15%，故 0.8 倍阈值不会误伤真实退市。
     prev_cnt = conn.execute("SELECT COUNT(*) FROM shares WHERE date=? AND exch='SH'",
                             (sh_last,)).fetchone()[0]
-    d = date.fromisoformat(sh_last) + timedelta(days=1)
+    last_d = date.fromisoformat(sh_last)
+    # 早间场次必须**重抓库内最新日**，而不是从次日往后推：
+    # 官方口径是「深市 T 日晚间仅供参考，以 T+1 早间更新的规模为准」，沪市同属
+    # 清算后数据也要再确认一次。若一律从 last+1 起，早间这场在「库内已到 T」时
+    # d 会直接越过 end，沪市一行不采、终值永远没被覆盖过——早间场次等于白跑。
+    # min(last_d, end) 同时覆盖两种情况：昨晚成功（重抓 T）与昨晚漏跑（补 T-1~T）。
+    d = last_d + timedelta(days=1) if is_evening() else min(last_d, end)
     while d <= end:
         if d.weekday() < 5:
             rows = fetch_sse_day(sess, d)      # 内部已重试 3 次
@@ -186,7 +224,7 @@ def collect_kline(conn, sess):
     cal = trading_calendar(conn)
     if not cal:
         NOTES.append("K线跳过：份额库为空，无法确定交易日历")
-        return
+        return False
     target = max(cal)
     cal_list = sorted(d for d in cal if d >= "2023-12-01")
 
@@ -206,26 +244,63 @@ def collect_kline(conn, sess):
         elif miss:
             todo.append(e)
             why[code] = f"区间缺 {len(miss)} 天（{miss[0]} ~ {miss[-1]}）"
+        elif not is_evening():
+            # 早间场次：末日已到也要重拉一次。晚间 23:30 抓到的成交额/成交量是
+            # 当日统计的中间态，收盘价虽已定稿，VWAP 仍可能微调；早间不重拉，
+            # 国家队站的净申赎金额就永远停在昨晚那版。
+            todo.append(e)
+            why[code] = "早间终值校正"
 
     if not todo:
         print(f"[K线] {len(WATCH)} 只均已追至 {target}，无区间缺口")
-        return
+        return True
 
-    ok, bad = 0, []
-    for e in todo:
-        if e["code"] in why:
-            print(f"  · {e['code']} {why[e['code']]}")
-        rows = fetch_kline(sess, e["code"])
+    ok, bad, graded = 0, [], []
+    streak = 0                      # 连续取不到目标日数据的只数（限流熔断用）
+    for i, e in enumerate(todo):
+        code = e["code"]
+        if code in why:
+            print(f"  · {code} {why[code]}")
+        # 截止日必须传 target：fetch_kline 默认只到「北京昨天」，
+        # 晚间 23:30 场次若不传，永远拿不到当日 K 线，K 线会永久落后一天。
+        rows = fetch_kline(sess, code, end=date.fromisoformat(target))
+        reached = bool(rows) and max(r[0] for r in rows) >= target
         if rows:
             conn.executemany("INSERT OR REPLACE INTO kline VALUES(?,?,?,?,?)", rows)
             conn.commit()
+        if reached:
             ok += 1
+            streak = 0
         else:
-            bad.append(e["code"])
-        time.sleep(1.2)
-    print(f"[K线] 需补 {len(todo)} 只，成功 {ok} 只")
+            # 库里已有目标日收盘价时，本次只是没做成终值确认，数据本身完整，
+            # 不该因此拦下整个国家队站的重建（降级为提示）。
+            have_target = conn.execute(
+                "SELECT 1 FROM kline WHERE code=? AND date=?", (code, target)).fetchone()
+            if have_target:
+                print(f"    ⚠ {code} 本次未取到 {target}，沿用库内已有收盘价", file=sys.stderr)
+                graded.append(code)
+                streak = 0
+            else:
+                if rows:
+                    print(f"    ⚠ {code} 返回末日 {max(r[0] for r in rows)} 仍早于 {target}"
+                          f"（东财尚未发布当日 K 线）", file=sys.stderr)
+                bad.append(code)
+                streak += 1
+        # 限流熔断：本机 IP 被东财拉黑时表现为连续 RemoteDisconnected，
+        # 每只 5 次重试要烧 46 秒，18 只就是 14 分钟，而且只会让封禁更久。
+        # 连挂 3 只即判定限流，停止本轮（下次运行自动重试，全链路幂等）。
+        if streak >= 3:
+            fail(f"K线连续 {streak} 只取不到 {target} 数据，判定东财限流，"
+                 f"已中止本轮（剩余 {len(todo) - i - 1} 只留待下次运行）")
+            break
+        time.sleep(1.5 + random.random())
+    print(f"[K线] 需补 {len(todo)} 只，追平 {ok} 只"
+          + (f"，终值未确认 {len(graded)} 只" if graded else ""))
     if bad:
-        fail(f"K线 {len(bad)} 只采集失败（{','.join(bad)}），下次运行自动重试")
+        fail(f"K线 {len(bad)} 只未追至 {target}（{','.join(bad)}），"
+             f"下次运行自动重试")
+        return False
+    return True
 
 
 def collect_futures(conn, sess):
@@ -238,18 +313,21 @@ def collect_futures(conn, sess):
     cal = trading_calendar(conn)
     if not cal:
         NOTES.append("期货跳过：份额库为空，无法确定交易日历")
-        return
+        return False
     last = conn.execute("SELECT MAX(date) FROM futures").fetchone()[0]
     if not last:
         NOTES.append("期货跳过：futures 表为空，请先用 build_db.py --cffex-only 回补")
-        return
-    cap = min(date.fromisoformat(max(cal)), beijing_yesterday())
+        return False
+    # 上限同样取目标日：晚上 23:30 跑时中金所当日席位已发布（16:30~17:00 更新），
+    # 早上 08:45 跑时目标日=昨天，席位早已采过，两者都不会越过未确认的日期。
+    cap = min(date.fromisoformat(max(cal)), beijing_target_date())
     d = date.fromisoformat(last) + timedelta(days=1)
     if d > cap:
         print(f"[期货] 已追平至 {last}（已确认交易日历止于 {max(cal)}）")
-        return
+        return True
     print(f"[期货] 从 {d} 追至 {cap}（已确认交易日历 {len(cal)} 天）")
     n = 0
+    fut_ok = True
     while d <= cap:
         ds = d.isoformat()
         if d.weekday() < 5 and ds in cal:
@@ -257,6 +335,7 @@ def collect_futures(conn, sess):
             if not rows:
                 # 份额已有该日 => 确定是交易日；拿不到席位数据就是真失败，停止推进
                 fail(f"中金所 {d} 为交易日但无数据，已停止推进（下次续采）")
+                fut_ok = False
                 break
             # 品种齐全性：fetch_cffex_day 内部对单个品种失败是 continue，
             # 会把「IH 成功、IM 失败」当成整日成功 → 席位合计少一个品种且无告警。
@@ -265,6 +344,7 @@ def collect_futures(conn, sess):
             if miss_p:
                 fail(f"中金所 {d} 品种不全（缺 {','.join(miss_p)}），"
                      f"已拒绝入库并停止推进（下次续采）")
+                fut_ok = False
                 break
             conn.executemany(
                 "INSERT OR REPLACE INTO futures VALUES(?,?,?,?,?,?,?)", rows)
@@ -272,6 +352,7 @@ def collect_futures(conn, sess):
             n += 1
         d += timedelta(days=1)
     print(f"[期货] 新增 {n} 个交易日")
+    return fut_ok
 
 
 def check_futures(conn, cal):
@@ -319,45 +400,85 @@ def check_align(conn):
     sh_max = max(sh) if sh else None
     sz_max = max(sz) if sz else None
     if sh_max != sz_max:
+        # 晚间 23:30 场次的正常时序差：沪市 23:00、深市 23:20 才发布初值，
+        # 任一方稍有延迟就会出现「一边已到 T、另一边停在 T-1」。这不是故障，
+        # 而是官方公布的更新时序；此时不重建（避免发布沪深错配的页面），
+        # 次日早间场次会自动补齐并把终值写进去。
+        global ALIGN_LAG
+        ahead, behind = max(sh_max, sz_max), min(sh_max, sz_max)
+        lag = sorted(d for d in trading_calendar(conn) if d > behind)
+        if is_evening() and len(lag) == 1:
+            side = "深市" if sz_max < sh_max else "沪市"
+            print(f"  ⏳ {side} {ahead} 初值尚未发布（落后至 {behind}），"
+                  f"晚间场次属正常时序差，明早自动补齐", file=sys.stderr)
+            NOTES.append(f"{side} {ahead} 尚未发布，本次不重建（明早补终值）")
+            ALIGN_LAG = True
+            return False
         fail(f"两市末日不一致（沪 {sh_max} / 深 {sz_max}）：本次有市场未追平，暂不重建页面")
         return False
     return True
 
 
-def rebuild():
-    for script in ("build_industry.py", "build_gjd.py"):
+def rebuild(scripts):
+    for script in scripts:
         r = subprocess.run([PY, os.path.join(ROOT, "scripts", script)],
                            capture_output=True, text=True)
         ok = r.returncode == 0
         print(f"[重建] {script}: {'OK' if ok else 'FAIL'}")
-        if not ok:
+        if ok:
+            BUILT.append(script)
+        else:
             FAILS.append(f"重建 {script} 失败")
+            BUILD_ERR.append(script)
             print(r.stderr[-2000:], file=sys.stderr)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-build", action="store_true")
+    # 本机 IP 被东财限流时，只为验证份额链路而跳过 K 线（生产不传这个参数）。
+    # 跳过时沿用库内已有 K 线，国家队站的市值会用到旧价，故仅用于调试。
+    ap.add_argument("--skip-kline", action="store_true",
+                    help="跳过 K 线采集（仅本机调试用，生产环境不要用）")
     args = ap.parse_args()
 
     conn = open_db()
     sess = make_session()
     sh_ok, sz_ok = collect_shares(conn, sess)
-    collect_kline(conn, sess)
-    collect_futures(conn, sess)
+    if args.skip_kline:
+        print("[K线] ⏭ 已按 --skip-kline 跳过（沿用库内已有收盘价）")
+        NOTES.append("K线本次跳过（--skip-kline）")
+        # 跳过不等于可用：K 线必须已覆盖最后一个交易日，否则国家队站的市值会用旧价，
+        # 按「任一缺价即置空」的严格口径它就不该重建。
+        kl_max = conn.execute("SELECT MAX(date) FROM kline").fetchone()[0]
+        cal = trading_calendar(conn)
+        kline_ok = bool(kl_max and cal and kl_max >= max(cal))
+        if not kline_ok:
+            NOTES.append(f"K线止于 {kl_max}，落后于交易日历末日，国家队站不重建")
+    else:
+        kline_ok = collect_kline(conn, sess)
+    fut_ok = collect_futures(conn, sess)
     alive = check_align(conn)
     check_futures(conn, trading_calendar(conn))
 
     if not args.no_build:
-        # 采集不完整时不重建：否则页面只写「更新至 X」，实际是"沪停在旧日、深到新日"、
-        # 或"份额到新日但价格/席位还停在前一天"的半截数据，且没有任何标记，比停更更危险。
-        # 因此门槛是"零失败"，而不是只看沪深份额。
-        if sh_ok and sz_ok and alive and not FAILS:
-            rebuild()
-        else:
-            print("[重建] ⏸ 已跳过：本次采集未全部成功（或两市末日不一致），"
-                  "页面保留上一版（避免混入半截数据）", file=sys.stderr)
-            NOTES.append("页面未重建：采集未全部成功时保留上一版")
+        # 按站点分别判断，而不是"一处失败两站都不发"：
+        #   · 行业站只吃份额，只要沪深份额齐全且对齐就能重建；
+        #   · 国家队站还要收盘价（净申赎/市值）与期货席位，缺一项就会出半截数据。
+        # 这样晚间场次即便东财当日 K 线还没出，行业站也能当晚更新，国家队站次日早补齐。
+        base_ok = sh_ok and sz_ok and alive
+        todo = []
+        if base_ok:
+            todo.append("build_industry.py")
+        if base_ok and kline_ok and fut_ok:
+            todo.append("build_gjd.py")
+        if todo:
+            rebuild(todo)
+        if len(todo) < 2:
+            miss = [s for s in ("build_industry.py", "build_gjd.py") if s not in todo]
+            print(f"[重建] ⏸ 跳过 {', '.join(miss)}：其依赖数据本次未全部就绪，"
+                  f"该站页面保留上一版（避免混入半截数据）", file=sys.stderr)
+            NOTES.append(f"未重建 {', '.join(miss)}：依赖数据未就绪，保留上一版")
 
     print("\n" + "=" * 60)
     if NOTES:
@@ -367,8 +488,19 @@ def main():
         print(f"[结果] ❌ {len(FAILS)} 项失败（数据缺口已避免，下次运行自动续采）:")
         for m in FAILS:
             print(f"   - {m}")
+
+    # 退出码决定 workflow 是否发布：
+    #   · 份额没采到 / 重建报错 / 两市末日不一致（非时序差）→ 页面不可信，1（不发布）
+    #   · 只有 K 线或期货未就绪 → 已重建的站是新数据，其余站保持上一版，2（照常发布）
+    #   · 晚间时序差（ALIGN_LAG）→ 本次本就没有新数据可发，不致命，落到 0/2
+    if BUILD_ERR or (not alive and not ALIGN_LAG) or not (sh_ok and sz_ok):
         log_run(conn, "FAIL")
         sys.exit(1)
+    if FAILS:
+        print(f"[结果] ⚠️ 部分降级：{len(BUILT)} 个站已更新并发布，"
+              f"其余站保留上一版（退出码 2，不阻断发布）")
+        log_run(conn, "PARTIAL")
+        sys.exit(2)
     print("[结果] ✅ 全部成功")
     log_run(conn, "OK")
 
