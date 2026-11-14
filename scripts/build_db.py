@@ -236,6 +236,41 @@ def fetch_kline(sess, code, end=None):
     return []
 
 
+def fetch_kline_batch(sess, codes):
+    """东财实时批量接口：一次请求拿多只的当日收盘价 + VWAP + 成交额。
+
+    push2his（历史 K 线）对单个出口 IP 有约「每分钟 6 次」的频率限流，18 只
+    逐只拉必然触发；push2（实时批量）走不同域名、单次请求拿全 18 只，是每日
+    增量阶段的正确通道。VWAP 口径与 fetch_kline 完全一致：amt / (vol×100)。
+
+    返回 {code: (close, vwap, amt_yi)}，拿不到的标的（停牌/无行情）不在结果里。
+    注意：盘前（如 08:45）当日累计量 f5=0，vwap 为 None，只有收盘价可用；但
+    早间场次只有在「晚间没追平」时才会走到这里，属罕见兜底，可接受。
+    """
+    if not codes:
+        return {}
+    secids = ",".join(("1." if c[0] == "5" else "0.") + c for c in codes)
+    url = "https://push2.eastmoney.com/api/qt/ulist.np/get"
+    params = {"secids": secids, "fields": "f2,f5,f6,f12", "fltt": "2"}
+    out = {}
+    try:
+        r = sess.get(url, params=params, timeout=30)
+        r.raise_for_status()
+        diff = ((r.json() or {}).get("data") or {}).get("diff") or []
+        for it in diff:
+            code = it.get("f12")
+            f2, f5, f6 = it.get("f2"), it.get("f5"), it.get("f6")
+            if code is None or f2 is None or f2 == "-":
+                continue
+            vwap = (f6 / (f5 * 100.0)) if (f5 and f6) else None
+            out[code] = (float(f2),
+                         round(vwap, 4) if vwap else None,
+                         f6 / 1e8 if f6 else None)
+    except Exception as ex:
+        print(f"  ! 批量K线失败: {ex}", file=sys.stderr)
+    return out
+
+
 def fetch_cffex_day(sess, d: date):
     """中金所某日 -> [(product, contract, long, long_chg, short, short_chg)] 仅中信期货"""
     name_of = lambda s: re.split(r"[(（]", s)[0].strip()
