@@ -83,7 +83,14 @@ def main():
             bad_files.append(f"{cat}: 解析失败")
             continue
         if D0 != dates:
-            bad_files.append(f"{cat}: 日期轴不一致（{len(D0)} vs {len(dates)}）")
+            # 晚间 23:30 场次若深市当日初值尚未发布，collect.py 会跳过重建，
+            # 此时页面日期轴是库的**严格前缀**：按页面的轴校验，逐格仍然严格，
+            # 只是不把"本次未重建"误报成结构错误。
+            if len(D0) < len(dates) and dates[:len(D0)] == D0:
+                print(f"  · {cat}: 页面落后库 {len(dates) - len(D0)} 个交易日"
+                      f"（本次未重建），按页面日期轴校验")
+            else:
+                bad_files.append(f"{cat}: 日期轴不一致（{len(D0)} vs {len(dates)}）")
         names = {s["name"] for s in S0}
         want = {s["name"] for s in mapping[cat]}
         if names != want:
